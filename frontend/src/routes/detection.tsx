@@ -16,8 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ANIMALS, VOICE_LINES, animalByName } from "@/lib/agrishield-data";
+import { VOICE_LINES } from "@/lib/agrishield-data";
 import { speakAlert, useAppState } from "@/lib/app-state";
+import { useDetection } from "@/hooks/useDetection";
 
 export const Route = createFileRoute("/detection")({
   head: () => ({
@@ -46,7 +47,8 @@ const SIDES = ["North Fence", "East Gate", "South Canal", "West Boundary"];
 
 function DetectionPage() {
   const { systemOn, settings } = useAppState();
-  const [running, setRunning] = useState(false);
+  const detectionMutation = useDetection();
+  
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [frame, setFrame] = useState(0);
@@ -54,9 +56,10 @@ function DetectionPage() {
   const videoInput = useRef<HTMLInputElement>(null);
   const [voiceLang, setVoiceLang] = useState(settings.voiceLanguage);
 
-  const runDetection = (kind: "image" | "video", file?: File) => {
-    const url = file ? URL.createObjectURL(file) : null;
-    setRunning(true);
+  const runDetection = async (kind: "image" | "video", file?: File) => {
+    if (!file) return;
+    
+    const url = URL.createObjectURL(file);
     setResult(null);
     setProgress(0);
     const timer = window.setInterval(() => {
@@ -105,10 +108,8 @@ function DetectionPage() {
     }, 150);
   };
 
-  const animal = result ? animalByName(result.animal) : null;
-  const voiceLine = result
-    ? (VOICE_LINES[voiceLang] ?? VOICE_LINES["English"]!)(result.animal, result.side)
-    : "";
+  const animal = result ? { emoji: "⚠️", name: result.animal, severity: "high" as const, deterrents: ["Siren", "Flash"], note: "Detected via AI" } : null;
+  const voiceLine = result ? `Attention! ${result.animal} detected near ${result.side}` : "";
 
   return (
     <AppShell

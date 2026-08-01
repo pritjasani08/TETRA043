@@ -1,19 +1,19 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect } from "react";
 
-import { useAppState } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import type { Severity } from "@/lib/agrishield-data";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { ready, authed } = useAppState();
+  const { isAuthed, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (ready && !authed) navigate({ to: "/auth", replace: true });
-  }, [ready, authed, navigate]);
+    if (!isLoading && !isAuthed) navigate({ to: "/auth", replace: true });
+  }, [isLoading, isAuthed, navigate]);
 
-  if (!ready || !authed) {
+  if (isLoading || !isAuthed) {
     return (
       <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">
         Loading secure console…

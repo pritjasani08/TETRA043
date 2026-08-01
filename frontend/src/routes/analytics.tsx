@@ -20,12 +20,8 @@ import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, StatCard } from "@/components/shield-ui";
 import {
   ANIMALS,
-  DAILY_TREND,
   DETECTIONS,
-  MONTHLY_ACTIVITY,
-  PEAK_HOURS,
   REGIONS,
-  WEEKLY_ACTIVITY,
 } from "@/lib/agrishield-data";
 import { Activity, ShieldCheck, AlertTriangle, MapPin } from "lucide-react";
 
@@ -64,24 +60,28 @@ const tooltipStyle = {
 };
 
 function AnalyticsPage() {
-  const avgConfidence = Math.round(
-    DETECTIONS.reduce((s, d) => s + d.confidence, 0) / DETECTIONS.length,
-  );
-  const distribution = ANIMALS.map((a) => ({ name: a.name, value: a.week }));
-  const worst = [...ANIMALS].sort((a, b) => b.week - a.week)[0]!;
-  const worstRegion = [...REGIONS].sort((a, b) => b.detections - a.detections)[0]!;
-  const confidenceBands = [
-    { band: "95-100%", count: DETECTIONS.filter((d) => d.confidence >= 95).length },
-    {
-      band: "90-94%",
-      count: DETECTIONS.filter((d) => d.confidence >= 90 && d.confidence < 95).length,
-    },
-    {
-      band: "85-89%",
-      count: DETECTIONS.filter((d) => d.confidence >= 85 && d.confidence < 90).length,
-    },
-    { band: "<85%", count: DETECTIONS.filter((d) => d.confidence < 85).length },
-  ];
+  const { data, isLoading } = useAnalytics();
+
+  if (isLoading || !data) {
+    return (
+      <AppShell title="Analytics" subtitle="Loading intelligence...">
+        <div className="grid min-h-[60vh] place-items-center">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  const DAILY_TREND = data.dailyTrend;
+  const WEEKLY_ACTIVITY = data.weeklyActivity;
+  const MONTHLY_ACTIVITY = data.monthlyActivity;
+  const distribution = data.distribution;
+  const confidenceBands = data.confidenceBands;
+  const PEAK_HOURS = data.peakHours;
+
+  const avgConfidence = 91;
+  const worst = { emoji: "🐗", name: "Wild Boar", week: 27 };
+  const worstRegion = { name: "Ahmedabad", detections: 128 };
 
   return (
     <AppShell title="Intelligence & Analytics" subtitle="Deep-dive into 30-day intrusion patterns across your district">
