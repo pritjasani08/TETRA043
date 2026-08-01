@@ -11,6 +11,16 @@ ALTER TABLE user_settings
 ADD CONSTRAINT fk_user_settings_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 ADD CONSTRAINT uq_user_settings_user_id UNIQUE (user_id);
 
+-- 1.2 Device Tokens Constraints
+ALTER TABLE device_tokens
+ADD CONSTRAINT fk_device_tokens_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+ADD CONSTRAINT uq_device_tokens_token UNIQUE (device_token);
+
+-- 1.3 Notifications Constraints
+ALTER TABLE notifications
+ADD CONSTRAINT fk_notifications_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+ADD CONSTRAINT fk_notifications_detection_id FOREIGN KEY (related_detection_id) REFERENCES detections(id) ON DELETE SET NULL;
+
 -- 2. Detections Constraints
 ALTER TABLE detections
 ADD CONSTRAINT chk_detections_confidence CHECK (confidence >= 0 AND confidence <= 1);
