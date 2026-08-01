@@ -11,6 +11,8 @@ import { authRoutes } from './modules/auth';
 import { dashboardRoutes } from './modules/dashboard';
 import { detectionRoutes } from './modules/detection';
 import { analyticsRoutes } from './modules/analytics';
+import { profileRoutes } from './modules/profile';
+import { settingsRoutes } from './modules/settings';
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/detections', detectionRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/profile', profileRoutes);
+app.use('/api/v1/settings', settingsRoutes);
 
 // Catch-all for 404
 app.use(notFoundHandler);
