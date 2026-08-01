@@ -92,19 +92,16 @@ function AgriShieldLandingPage() {
             aria-label="Toggle Menu"
           >
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "rotate-45 translate-y-[8px]" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "rotate-45 translate-y-[8px]" : ""
+                }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "opacity-0 scale-0" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "opacity-0 scale-0" : ""
+                }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "-rotate-45 -translate-y-[8px]" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "-rotate-45 -translate-y-[8px]" : ""
+                }`}
             />
           </button>
         </div>
@@ -112,9 +109,8 @@ function AgriShieldLandingPage() {
 
       {/* Mobile Slide-in Menu Panel */}
       <div
-        className={`fixed top-0 right-0 bottom-0 z-40 w-[85%] max-w-[340px] bg-[#0a0608]/98 backdrop-blur-2xl border-l border-white/10 p-8 pt-28 flex flex-col justify-between shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 bottom-0 z-40 w-[85%] max-w-[340px] bg-[#0a0608]/98 backdrop-blur-2xl border-l border-white/10 p-8 pt-28 flex flex-col justify-between shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col gap-8">
           {navLinks.map((link, i) => (
@@ -125,9 +121,8 @@ function AgriShieldLandingPage() {
               style={{
                 transitionDelay: `${150 + i * 75}ms`,
               }}
-              className={`text-xl font-light tracking-wide hover:text-white/80 transition-all duration-500 transform ${
-                isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-              }`}
+              className={`text-xl font-light tracking-wide hover:text-white/80 transition-all duration-500 transform ${isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+                }`}
             >
               {link.label}
             </a>
@@ -138,9 +133,8 @@ function AgriShieldLandingPage() {
           to="/auth"
           onClick={() => setIsMenuOpen(false)}
           style={{ transitionDelay: "375ms" }}
-          className={`w-full bg-white text-black py-4 rounded-full font-semibold text-xs uppercase tracking-widest hover:bg-white/90 transition-all duration-500 text-center block shadow-lg shadow-white/5 hover:shadow-white/10 ${
-            isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-          }`}
+          className={`w-full bg-white text-black py-4 rounded-full font-semibold text-xs uppercase tracking-widest hover:bg-white/90 transition-all duration-500 text-center block shadow-lg shadow-white/5 hover:shadow-white/10 ${isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+            }`}
         >
           Enter Console
         </Link>
@@ -174,10 +168,10 @@ function AgriShieldLandingPage() {
           </div>
 
           {/* Heading */}
-          <h1 className="font-inter font-bold text-white text-4xl sm:text-5xl md:text-6xl lg:text-[72px] leading-tight tracking-tight text-center text-glow select-text">
+          <h1 className="font-instrument italic font-light text-white text-4xl sm:text-6xl md:text-8xl lg:text-[110px] leading-[0.95] md:leading-[0.9] tracking-tight text-center text-glow select-text">
             Your fields.
             <br />
-            Secured around the clock.
+            Watched all night.
           </h1>
 
           {/* Elegant Description */}
