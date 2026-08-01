@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   RadialBar,
@@ -27,21 +27,12 @@ import {
   REGIONS,
   WEEKLY_ACTIVITY,
 } from "@/lib/agrishield-data";
+import { Activity, ShieldCheck, AlertTriangle, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
       { title: "Intrusion Analytics — AgriShield AI" },
-      {
-        name: "description",
-        content:
-          "KPIs and charts on intrusions per day, animal mix, weekly and monthly comparison, confidence and peak hours.",
-      },
-      { property: "og:title", content: "Intrusion Analytics — AgriShield AI" },
-      {
-        property: "og:description",
-        content: "Deep-dive analytics on animal intrusion patterns across your farm and district.",
-      },
     ],
   }),
   component: () => (
@@ -52,21 +43,24 @@ export const Route = createFileRoute("/analytics")({
 });
 
 const COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
+  "var(--primary)",
+  "var(--warning)",
+  "var(--accent)",
+  "var(--destructive)",
   "var(--chart-4)",
   "var(--chart-5)",
-  "var(--success)",
-  "var(--warning)",
 ];
 
 const tooltipStyle = {
-  background: "var(--popover)",
-  border: "1px solid var(--border)",
-  borderRadius: 12,
-  fontSize: 12,
-  color: "var(--popover-foreground)",
+  background: "rgba(255, 255, 255, 0.95)",
+  backdropFilter: "blur(12px)",
+  border: "none",
+  borderRadius: "16px",
+  boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
+  fontSize: "13px",
+  fontWeight: 600,
+  color: "var(--foreground)",
+  padding: "12px 16px",
 };
 
 function AnalyticsPage() {
@@ -90,153 +84,139 @@ function AnalyticsPage() {
   ];
 
   return (
-    <AppShell title="Analytics" subtitle="30-day intrusion intelligence for your farm and district">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Total detections" value={DETECTIONS.length * 6} hint="Last 30 days" />
-        <StatCard label="Active days" value="28 / 30" hint="Monitoring uptime 93%" tone="primary" />
-        <StatCard label="Average confidence" value={`${avgConfidence}%`} hint="AgriVision-v3" />
-        <StatCard
-          label="Most dangerous animal"
-          value={`${worst.emoji} ${worst.name}`}
-          hint={`${worst.week} detections this week`}
-          tone="danger"
-        />
-        <StatCard
-          label="Most dangerous region"
-          value={worstRegion.name}
-          hint={`${worstRegion.detections} district detections`}
-          tone="warning"
-        />
-      </div>
+    <AppShell title="Intelligence & Analytics" subtitle="Deep-dive into 30-day intrusion patterns across your district">
+      <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
+        
+        {/* Top Stats Overview */}
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard 
+            label="Total Detections" 
+            value={DETECTIONS.length * 6} 
+            hint="Last 30 days" 
+            icon={<Activity className="size-5" />} 
+          />
+          <StatCard 
+            label="System Reliability" 
+            value={`${avgConfidence}%`} 
+            hint="AgriVision-v3 Confidence" 
+            tone="primary" 
+            icon={<ShieldCheck className="size-5" />} 
+          />
+          <StatCard
+            label="Highest Risk Threat"
+            value={<span className="flex items-center gap-2">{worst.emoji} {worst.name}</span>}
+            hint={`${worst.week} detections this week`}
+            tone="warning"
+            icon={<AlertTriangle className="size-5" />}
+          />
+          <StatCard
+            label="Most Vulnerable Region"
+            value={worstRegion.name}
+            hint={`${worstRegion.detections} district detections`}
+            tone="danger"
+            icon={<MapPin className="size-5" />}
+          />
+        </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <PanelSection title="Intrusions per day" description="Rolling 7-day count">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={DAILY_TREND}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  itemStyle={{ color: "var(--popover-foreground)" }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="intrusions"
-                  stroke="var(--chart-1)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Main Trend Chart */}
+          <PanelSection title="Activity Trend" description="Rolling 7-day intrusion count" className="lg:col-span-2 p-6 md:p-8">
+            <div className="h-[300px] mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={DAILY_TREND}>
+                  <defs>
+                    <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)', fontWeight: 500 }} dy={15} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)', fontWeight: 500 }} dx={-10} />
+                  <Tooltip contentStyle={tooltipStyle} itemStyle={{ color: 'var(--primary)' }} />
+                  <Area type="monotone" dataKey="intrusions" stroke="var(--primary)" strokeWidth={4} fillOpacity={1} fill="url(#colorTrend)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
 
-        <PanelSection title="Animal distribution" description="Weekly detection share">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={distribution} dataKey="value" nameKey="name" outerRadius={80}>
-                  {distribution.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  itemStyle={{ color: "var(--popover-foreground)" }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                  cursor={false}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
+          <PanelSection title="Animal Distribution" description="Weekly detection share by species">
+            <div className="h-[280px] mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={distribution} 
+                    dataKey="value" 
+                    nameKey="name" 
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={4}
+                    cornerRadius={8}
+                    stroke="none"
+                  >
+                    {distribution.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
 
-        <PanelSection title="Weekly comparison" description="Intrusions vs deterred">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={WEEKLY_ACTIVITY}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  itemStyle={{ color: "var(--popover-foreground)" }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                />
-                <Bar dataKey="intrusions" fill="var(--chart-4)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="deterred" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
+          <PanelSection title="Intervention Success" description="Intrusions vs Successfully Deterred">
+            <div className="h-[280px] mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={WEEKLY_ACTIVITY}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
+                  <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)', opacity: 0.1 }} />
+                  <Bar dataKey="deterred" name="Successfully Deterred" fill="var(--primary)" radius={[4, 4, 0, 0]} stackId="a" />
+                  <Bar dataKey="intrusions" name="Undeterred Intrusions" fill="var(--destructive)" radius={[4, 4, 0, 0]} stackId="a" opacity={0.8} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
 
-        <PanelSection title="Monthly comparison" description="Season-long trend">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MONTHLY_ACTIVITY}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="intrusions" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
+          <PanelSection title="Seasonal Comparison" description="Monthly activity tracking">
+            <div className="h-[280px] mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={MONTHLY_ACTIVITY}>
+                  <defs>
+                    <linearGradient id="colorMonth" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--accent)" stopOpacity={1} />
+                      <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.6} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)', opacity: 0.1 }} />
+                  <Bar dataKey="intrusions" fill="url(#colorMonth)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
 
-        <PanelSection title="Detection confidence" description="Confidence band distribution">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart
-                data={confidenceBands}
-                innerRadius="28%"
-                outerRadius="95%"
-                startAngle={90}
-                endAngle={-270}
-              >
-                <RadialBar dataKey="count" cornerRadius={8}>
-                  {confidenceBands.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </RadialBar>
-                <Tooltip contentStyle={tooltipStyle} />
-              </RadialBarChart>
-            </ResponsiveContainer>
-          </div>
-          <ul className="mt-2 grid grid-cols-2 gap-1.5 text-xs">
-            {confidenceBands.map((b, i) => (
-              <li key={b.band} className="flex items-center gap-2">
-                <span
-                  className="size-2.5 rounded-full"
-                  style={{ background: COLORS[i % COLORS.length] }}
-                />
-                {b.band}
-                <span className="ml-auto text-muted-foreground">{b.count}</span>
-              </li>
-            ))}
-          </ul>
-        </PanelSection>
-
-        <PanelSection title="Peak detection time" description="Highest risk window: 8 PM – 10 PM">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={PEAK_HOURS}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="hour" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                  {PEAK_HOURS.map((h, i) => (
-                    <Cell key={i} fill={h.count > 18 ? "var(--destructive)" : "var(--chart-1)"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
+          <PanelSection title="Risk Window" description="Peak detection hours (Highest risk: 8 PM - 10 PM)">
+            <div className="h-[280px] mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={PEAK_HOURS}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.5} />
+                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)', opacity: 0.1 }} />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {PEAK_HOURS.map((h, i) => (
+                      <Cell key={i} fill={h.count > 18 ? "var(--warning)" : "var(--primary)"} opacity={h.count > 18 ? 1 : 0.6} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
+        </div>
       </div>
     </AppShell>
   );
