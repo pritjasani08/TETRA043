@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MapPin, Star, Navigation, Clock, ExternalLink } from "lucide-react";
+import { MapPin, Navigation, Clock, ExternalLink, Activity } from "lucide-react";
 import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
@@ -76,17 +76,7 @@ const REGION_COORDS: Record<
 export const Route = createFileRoute("/heatmap")({
   head: () => ({
     meta: [
-      { title: "Gujarat Intrusion Heatmap — AgriShield AI" },
-      {
-        name: "description",
-        content:
-          "District-level animal intrusion risk map for Gujarat with high, medium and low risk zones.",
-      },
-      { property: "og:title", content: "Gujarat Intrusion Heatmap — AgriShield AI" },
-      {
-        property: "og:description",
-        content: "See which districts report the most crop-raiding animal activity.",
-      },
+      { title: "Regional Heatmap — AgriShield AI" },
     ],
   }),
   component: () => (
@@ -102,142 +92,155 @@ function HeatmapPage() {
 
   return (
     <AppShell
-      title="Risk Heatmap"
-      subtitle="Gujarat district intrusion density (live interactive telemetry map)"
+      title="Regional Heatmap"
+      subtitle="Interactive district intrusion density for Gujarat telemetry"
     >
-      <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-        {/* Gujarat map panel */}
-        <PanelSection title="Gujarat overview" description="Tap a district marker for details">
-          <div className="h-[500px] w-full">
-            <Map center={[71.7, 22.4]} zoom={8.15}>
-              {REGIONS.map((r) => {
-                const details = REGION_COORDS[r.name] || {
-                  lat: 22.0,
-                  lng: 72.0,
-                  image:
-                    "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop",
-                  uptime: "Uptime: 99%",
-                  notes: "Scanning active.",
-                };
+      <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="grid gap-8 lg:grid-cols-[1.8fr_1fr]">
+          
+          {/* Map Panel */}
+          <PanelSection title="Gujarat Activity Map" description="Tap a district marker for regional intelligence" className="p-4 md:p-6 pb-4">
+            <div className="h-[600px] w-full rounded-[2rem] overflow-hidden border border-border/50 shadow-inner bg-surface">
+              <Map center={[71.7, 22.4]} zoom={8.15}>
+                {REGIONS.map((r) => {
+                  const details = REGION_COORDS[r.name] || {
+                    lat: 22.0,
+                    lng: 72.0,
+                    image:
+                      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=300&h=200&fit=crop",
+                    uptime: "Uptime: 99%",
+                    notes: "Scanning active.",
+                  };
 
-                return (
-                  <MapMarker key={r.name} longitude={details.lng} latitude={details.lat}>
-                    <MarkerContent>
-                      <div
+                  return (
+                    <MapMarker key={r.name} longitude={details.lng} latitude={details.lat}>
+                      <MarkerContent>
+                        <div
+                          onClick={() => setActive(r.name)}
+                          className={cn(
+                            "size-6 rounded-full border-[3px] border-white shadow-lg transition-all duration-300 hover:scale-125 flex items-center justify-center cursor-pointer",
+                            r.risk === "high"
+                              ? "bg-destructive shadow-[0_0_15px_var(--destructive)] animate-pulse"
+                              : r.risk === "medium"
+                                ? "bg-warning shadow-[0_0_15px_var(--warning)]"
+                                : "bg-primary shadow-[0_0_15px_var(--primary)]",
+                          )}
+                        >
+                          <span className="size-2 rounded-full bg-white/80 animate-ping" />
+                        </div>
+                        <MarkerLabel position="bottom" className="font-bold text-xs bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-full mt-1 border border-border text-foreground">{r.name}</MarkerLabel>
+                      </MarkerContent>
+
+                      <MarkerPopup className="w-72 p-0 rounded-2xl overflow-hidden border-none shadow-2xl">
+                        {/* Premium Light Theme Popup */}
+                        <div className="relative h-32 overflow-hidden bg-surface">
+                          <img
+                            src={details.image}
+                            alt={r.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-3 left-3 z-10">
+                            <RiskPill level={r.risk} />
+                          </div>
+                          {/* Inner soft gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        </div>
+
+                        <div className="space-y-3 p-5 text-left bg-white">
+                          <div>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                               <Activity className="size-3 text-primary" />
+                               Intrusion Intensity: {r.detections} Logs
+                            </p>
+                            <h3 className="text-lg font-display font-bold text-foreground leading-tight tracking-tight">
+                              {r.name} District
+                            </h3>
+                          </div>
+
+                          <p className="text-muted-foreground text-xs font-medium leading-relaxed">
+                            {details.notes}
+                          </p>
+
+                          <div className="flex items-center gap-2 text-xs font-semibold text-primary pt-1 bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10">
+                            <Clock className="size-3.5" />
+                            {details.uptime}
+                          </div>
+
+                          <div className="flex gap-2 pt-3">
+                            <Button
+                              size="sm"
+                              className="flex-1 rounded-xl font-bold shadow-md shadow-primary/20 hover:-translate-y-0.5 transition-transform"
+                              onClick={() => setActive(r.name)}
+                            >
+                              <Navigation className="size-3.5 mr-2" />
+                              Focus Grid
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="px-3 rounded-xl border-border hover:bg-surface"
+                              onClick={() => toast.success(`Viewing live telemetry for ${r.name}`)}
+                            >
+                              <ExternalLink className="size-3.5 text-foreground" />
+                            </Button>
+                          </div>
+                        </div>
+                      </MarkerPopup>
+                    </MapMarker>
+                  );
+                })}
+              </Map>
+            </div>
+          </PanelSection>
+
+          {/* Right Column: Selected details and ranked lists */}
+          <div className="flex flex-col gap-6">
+            <PanelSection title={selected.name} description="Selected district overview" className="p-6 md:p-8">
+              <div className="flex flex-col gap-2">
+                 <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                     <div className="p-2.5 bg-primary/10 rounded-2xl text-primary">
+                        <MapPin className="size-6" />
+                     </div>
+                     <span className="font-display text-4xl font-bold tracking-tight text-foreground">
+                       {selected.detections}
+                     </span>
+                   </div>
+                   <RiskPill level={selected.risk} />
+                 </div>
+                 <p className="mt-3 text-sm font-medium text-muted-foreground leading-relaxed">
+                   Verified intrusion events logged in the last 30 days across participating farms in this region.
+                 </p>
+              </div>
+            </PanelSection>
+
+            <PanelSection title="Regional Ranking" description="Districts sorted by intrusion volume" className="p-6 md:p-8 flex-1">
+              <ul className="space-y-3 mt-2">
+                {[...REGIONS]
+                  .sort((a, b) => b.detections - a.detections)
+                  .map((r, i) => (
+                    <li key={r.name}>
+                      <button
+                        type="button"
                         onClick={() => setActive(r.name)}
                         className={cn(
-                          "size-5.5 rounded-full border-2 border-white shadow-xl transition-all duration-300 hover:scale-125 flex items-center justify-center cursor-pointer",
-                          r.risk === "high"
-                            ? "bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.5)] animate-pulse"
-                            : r.risk === "medium"
-                              ? "bg-yellow-500 shadow-[0_0_12px_rgba(234,179,8,0.5)]"
-                              : "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]",
+                          "flex w-full items-center gap-4 rounded-[1.5rem] border px-4 py-3.5 text-left transition-all duration-300",
+                          active === r.name
+                            ? "border-primary/30 bg-primary shadow-md shadow-primary/20 text-white"
+                            : "border-border bg-white hover:border-primary/40 hover:bg-surface hover:-translate-y-0.5 shadow-sm",
                         )}
                       >
-                        <span className="size-2 rounded-full bg-white/60 animate-ping" />
-                      </div>
-                      <MarkerLabel position="bottom">{r.name}</MarkerLabel>
-                    </MarkerContent>
-
-                    <MarkerPopup className="w-64 p-0">
-                      <div className="relative h-28 overflow-hidden rounded-t-xl bg-[#0e101f]">
-                        <img
-                          src={details.image}
-                          alt={r.name}
-                          className="w-full h-full object-cover opacity-90"
-                        />
-                        <div className="absolute top-2 left-2 z-10">
-                          <RiskPill level={r.risk} />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 p-3.5 text-left text-xs bg-[#0b0d19]">
-                        <div>
-                          <p className="text-[10px] text-primary font-bold uppercase tracking-wider">
-                            Intrusion Intensity: {r.detections} Logs
-                          </p>
-                          <h3 className="text-sm font-bold text-white mt-0.5 leading-tight">
-                            {r.name} District
-                          </h3>
-                        </div>
-
-                        <p className="text-white/60 leading-normal text-[11px] font-light">
-                          {details.notes}
-                        </p>
-
-                        <div className="flex items-center gap-4 text-[10px] text-white/40 pt-1 font-mono">
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3 text-primary" />
-                            {details.uptime}
-                          </span>
-                        </div>
-
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            size="sm"
-                            className="flex-1 bg-primary text-black font-semibold text-[10px] uppercase tracking-wider hover:bg-primary/95"
-                            onClick={() => setActive(r.name)}
-                          >
-                            <Navigation className="size-3 mr-1" />
-                            Focus Grid
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="px-2.5 border-white/10 hover:bg-white/5 hover:text-white"
-                            onClick={() => toast.success(`Viewing live telemetry for ${r.name}`)}
-                          >
-                            <ExternalLink className="size-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </MarkerPopup>
-                  </MapMarker>
-                );
-              })}
-            </Map>
+                        <span className={cn("text-xs font-bold w-4", active === r.name ? "text-primary-foreground/80" : "text-muted-foreground")}>#{i + 1}</span>
+                        <span className="flex-1 font-bold text-sm">{r.name}</span>
+                        <span className={cn("text-sm font-bold tabular-nums", active === r.name ? "text-white" : "text-muted-foreground")}>{r.detections}</span>
+                        <RiskPill level={r.risk} />
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </PanelSection>
           </div>
-        </PanelSection>
-
-        {/* Selected details and ranked lists */}
-        <div className="flex flex-col gap-4">
-          <PanelSection title={selected.name} description="Selected district details">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 font-display text-2xl font-bold">
-                <MapPin className="size-5 text-primary" />
-                {selected.detections}
-              </span>
-              <RiskPill level={selected.risk} />
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              detections logged in the last 30 days across participating farms.
-            </p>
-          </PanelSection>
-
-          <PanelSection title="District ranking" description="Sorted by intrusion volume">
-            <ul className="space-y-2">
-              {[...REGIONS]
-                .sort((a, b) => b.detections - a.detections)
-                .map((r) => (
-                  <li key={r.name}>
-                    <button
-                      type="button"
-                      onClick={() => setActive(r.name)}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
-                        active === r.name
-                          ? "border-primary/40 bg-primary/10"
-                          : "border-border hover:bg-surface/60",
-                      )}
-                    >
-                      <span className="flex-1 font-medium">{r.name}</span>
-                      <span className="text-xs text-muted-foreground">{r.detections}</span>
-                      <RiskPill level={r.risk} />
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          </PanelSection>
+          
         </div>
       </div>
     </AppShell>
