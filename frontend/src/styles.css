@@ -61,51 +61,59 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.98 0.01 120); /* Off-white with slight green tint */
-  --foreground: oklch(0.20 0.02 120);
-  --surface: oklch(1 0 0); /* White */
-  --surface-2: oklch(0.96 0.01 120);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.02 120);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.02 120);
-  --primary: oklch(0.55 0.12 145); /* Soft, natural green */
-  --primary-foreground: oklch(0.98 0.01 145);
-  --secondary: oklch(0.94 0.02 120);
-  --secondary-foreground: oklch(0.30 0.02 120);
-  --muted: oklch(0.96 0.01 120);
-  --muted-foreground: oklch(0.50 0.02 120);
-  --accent: oklch(0.94 0.02 120);
-  --accent-foreground: oklch(0.20 0.02 120);
-  --destructive: oklch(0.60 0.15 30);
-  --destructive-foreground: oklch(1 0 0);
-  --warning: oklch(0.70 0.15 70);
-  --warning-foreground: oklch(0.20 0.05 70);
-  --success: oklch(0.60 0.15 145);
-  --success-foreground: oklch(1 0 0);
-  --border: oklch(0.92 0.01 120);
-  --input: oklch(0.92 0.01 120);
-  --ring: oklch(0.55 0.12 145);
+  --radius: 1.5rem; /* Large organic rounded shapes */
+  --background: #F8F6F1; /* Warm Cream */
+  --foreground: #1B5E20; /* Primary Forest Green for sharp text contrast */
+  --surface: #FFFFFF; /* White */
+  --surface-2: #F8F6F1;
+  --card: #FFFFFF;
+  --card-foreground: #1B5E20;
+  --popover: #FFFFFF;
+  --popover-foreground: #1B5E20;
   
-  --chart-1: oklch(0.55 0.12 145); /* Green */
-  --chart-2: oklch(0.75 0.12 70);  /* Soft Amber */
-  --chart-3: oklch(0.65 0.10 200); /* Muted Blue */
-  --chart-4: oklch(0.60 0.15 30);  /* Soft Red */
-  --chart-5: oklch(0.80 0.05 100); /* Beige */
+  --primary: #1B5E20; /* Forest Green */
+  --primary-foreground: #FFFFFF;
   
-  --sidebar: oklch(0.98 0.01 120);
-  --sidebar-foreground: oklch(0.30 0.02 120);
-  --sidebar-primary: oklch(0.55 0.12 145);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.94 0.02 120);
-  --sidebar-accent-foreground: oklch(0.20 0.02 120);
-  --sidebar-border: oklch(0.92 0.01 120);
-  --sidebar-ring: oklch(0.55 0.12 145);
+  --secondary: #4CAF50; /* Fresh Leaf */
+  --secondary-foreground: #FFFFFF;
+  
+  --muted: rgba(141, 110, 99, 0.1); /* Very subtle Earth Brown */
+  --muted-foreground: #8D6E63; /* Earth Brown */
+  
+  --accent: #4FC3F7; /* Sky Blue Accent */
+  --accent-foreground: #FFFFFF;
+  
+  --destructive: #FF6B6B; /* Danger Coral */
+  --destructive-foreground: #FFFFFF;
+  
+  --warning: #FFB300; /* Warning Amber */
+  --warning-foreground: #FFFFFF;
+  
+  --success: #4CAF50; /* Fresh Leaf */
+  --success-foreground: #FFFFFF;
+  
+  --border: rgba(141, 110, 99, 0.15); /* Soft Earth Brown border */
+  --input: rgba(141, 110, 99, 0.15);
+  --ring: #4CAF50; /* Fresh Leaf focus ring */
+  
+  --chart-1: #1B5E20;
+  --chart-2: #4CAF50;
+  --chart-3: #4FC3F7;
+  --chart-4: #FFB300;
+  --chart-5: #8D6E63;
+  
+  --sidebar: #F8F6F1; /* Match background so it floats cleanly */
+  --sidebar-foreground: #1B5E20;
+  --sidebar-primary: #1B5E20;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(76, 175, 80, 0.1); /* Fresh Leaf bg for active state */
+  --sidebar-accent-foreground: #1B5E20;
+  --sidebar-border: rgba(141, 110, 99, 0.15);
+  --sidebar-ring: #4CAF50;
 }
 
 .dark {
-  /* Keeping light mode primary for now as per clean SaaS plan */
+  /* No dark mode for this hackathon presentation to force the pristine clean look */
 }
 
 @layer base {
@@ -117,6 +125,8 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -125,7 +135,7 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em; /* Premium tight tracking */
   }
 }
 
@@ -133,10 +143,15 @@
   background-color: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 12px -4px oklch(0 0 0 / 0.05), 0 0 0 1px oklch(0 0 0 / 0.02);
+  /* Massive, ultra-soft drop shadow */
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.02);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-@utility text-gradient {
+@utility panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.05), 0 2px 5px rgba(0,0,0,0.02);
+}
   background: linear-gradient(92deg, var(--primary), var(--warning));
   -webkit-background-clip: text;
   background-clip: text;
