@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+with open("/Users/pareshtank/TETRA043/frontend/src/routes/history.tsx", "w") as f:
+    f.write("""import { createFileRoute } from "@tanstack/react-router";
 import { 
   Download, Search, Calendar, MapPin, Activity, ShieldAlert, 
   CheckCircle2, ChevronRight, ChevronLeft, FileText, Printer, Share2, 
@@ -205,7 +206,7 @@ function HistoryPage() {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10 rounded-xl border border-border bg-white shadow-sm hover:bg-surface hover:text-primary text-foreground transition-all active:scale-95">
+                <Button variant="outline" size="sm" className="h-10 rounded-xl border border-border bg-white shadow-sm hover:bg-surface text-foreground transition-all active:scale-95">
                   <Download className="size-4 mr-2" /> Export
                 </Button>
               </DropdownMenuTrigger>
@@ -346,3 +347,4 @@ function HistoryPage() {
     </AppShell>
   );
 }
+""")
