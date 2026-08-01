@@ -1,0 +1,30 @@
+.scroll-stack-scroller {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.scroll-stack-inner {
+  position: relative;
+  /* Extra spacing at bottom to allow scrolling space for all cards to stack */
+  padding-bottom: 240px;
+}
+
+.scroll-stack-card {
+  transform-origin: top center;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  position: relative;
+}
+
+.scroll-stack-end {
+  width: 100%;
+  height: 1px;
+}
