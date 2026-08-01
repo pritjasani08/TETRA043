@@ -29,6 +29,15 @@
 - `GET /api/v1/settings`: Retrieves the user's application settings. **Requires Authentication header**.
 - `PUT /api/v1/settings`: Updates the user's settings. Accepts partial updates (e.g. `language`, `theme`, `alertVolume`). **Requires Authentication header**.
 
+### Notifications
+- `GET /api/v1/notifications`: Retrieves paginated notifications (query: `?page=1&limit=20&isRead=false&type=DETECTION`). **Requires Auth**.
+- `GET /api/v1/notifications/unread`: Retrieves all unread notifications. **Requires Auth**.
+- `PATCH /api/v1/notifications/:id/read`: Marks a single notification as read. **Requires Auth**.
+- `PATCH /api/v1/notifications/read-all`: Marks all notifications as read. **Requires Auth**.
+- `DELETE /api/v1/notifications/:id`: Deletes a notification. **Requires Auth**.
+- `POST /api/v1/device-tokens`: Registers a device token for push notifications (body: `deviceToken`, `platform`, `deviceName`, `appVersion`). **Requires Auth**.
+- `DELETE /api/v1/device-tokens/:id`: Removes a device token. **Requires Auth**.
+
 ### Standard Response Format
 Every endpoint guarantees this `ApiResponse` format:
 ```json

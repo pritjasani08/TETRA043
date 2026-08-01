@@ -8,6 +8,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 DROP TABLE IF EXISTS alerts CASCADE;
 DROP TABLE IF EXISTS detections CASCADE;
 DROP TABLE IF EXISTS user_settings CASCADE;
+DROP TABLE IF EXISTS device_tokens CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 -- ------------------------------------------
@@ -46,6 +48,45 @@ CREATE TABLE IF NOT EXISTS user_settings (
     theme VARCHAR(20) DEFAULT 'light',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------
+-- 1.2. Device Tokens Table
+-- ------------------------------------------
+CREATE TABLE IF NOT EXISTS device_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    device_token VARCHAR(512) NOT NULL,
+    platform VARCHAR(50),
+    device_name VARCHAR(100),
+    app_version VARCHAR(50),
+    is_active BOOLEAN DEFAULT TRUE,
+    last_failure TIMESTAMP WITH TIME ZONE,
+    failure_count INTEGER DEFAULT 0,
+    last_used_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------
+-- 1.3. Notifications Table
+-- ------------------------------------------
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    category VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    priority VARCHAR(50) NOT NULL,
+    delivery_status VARCHAR(50) DEFAULT 'PENDING',
+    related_detection_id UUID,
+    metadata JSONB,
+    is_read BOOLEAN DEFAULT FALSE,
+    sent_at TIMESTAMP WITH TIME ZONE,
+    delivered_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP WITH TIME ZONE
 );
 
 -- ------------------------------------------
