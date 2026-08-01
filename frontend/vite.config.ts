@@ -37,7 +37,7 @@ try {
 try {
   const srcDir =
     "C:/Users/aryan/.gemini/antigravity-ide/brain/a4c4895d-4dce-4717-8d87-32ece6768228";
-  const destDir = path.resolve(__dirname, "public");
+  const destDir = path.resolve(import.meta.dirname, "public");
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }

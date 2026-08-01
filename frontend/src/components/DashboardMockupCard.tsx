@@ -512,16 +512,16 @@ export function DashboardMockupCard({
         return (
           <div
             key={idx}
-            className={`absolute z-20 hidden items-center gap-2.5 rounded-xl border border-white/10 bg-[#070913]/90 hover:bg-white/[0.08] px-3 py-2.5 text-xs text-white shadow-xl backdrop-blur-2xl lg:flex transition-all duration-500 hover:scale-105 ${chip.xPosClass} ${chip.yPosClass}`}
+            className={`absolute z-20 hidden items-center gap-2 rounded-md border border-white/10 bg-[#070913]/95 hover:bg-white/[0.1] px-2.5 py-2 text-[11px] font-medium text-white shadow-xl backdrop-blur-2xl lg:flex transition-all duration-500 hover:scale-105 w-[146px] ${chip.xPosClass} ${chip.yPosClass}`}
           >
             <div
-              className={`grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br ${chip.gradFrom} ${chip.gradTo}`}
+              className={`grid h-6 w-6 shrink-0 place-items-center rounded bg-gradient-to-br ${chip.gradFrom} ${chip.gradTo}`}
             >
               <ChipIcon className="h-3.5 w-3.5 text-white" />
             </div>
-            <div>
-              <div className="font-semibold">{chip.title}</div>
-              <div className="text-[10px] text-white/50">{chip.subtitle}</div>
+            <div className="flex flex-col min-w-0">
+              <div className="truncate font-semibold leading-tight">{chip.title}</div>
+              {chip.subtitle && <div className="truncate text-[9px] text-white/50 leading-tight mt-0.5">{chip.subtitle}</div>}
             </div>
           </div>
         );
