@@ -77,12 +77,10 @@ function Brand() {
 
 export function AppShell({
   title,
-  subtitle,
   children,
   actions,
 }: {
   title: string;
-  subtitle?: string;
   children: ReactNode;
   actions?: ReactNode;
 }) {
@@ -155,7 +153,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Seamless Header */}
-        <header className="sticky top-0 z-40 flex flex-wrap items-center gap-4 bg-background/80 px-4 py-6 backdrop-blur-xl md:px-10 md:py-8 lg:bg-transparent lg:backdrop-blur-none">
+        <header className="sticky top-4 z-40 mx-4 md:mx-10 mb-6 flex flex-wrap items-center gap-4 bg-white/70 px-6 py-4 backdrop-blur-xl border border-white/80 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="rounded-xl lg:hidden bg-white shadow-sm border-border">
@@ -170,11 +168,10 @@ export function AppShell({
             </SheetContent>
           </Sheet>
           
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">{title}</h1>
-            {subtitle && (
-              <p className="mt-1 truncate text-sm font-medium text-muted-foreground md:text-base">{subtitle}</p>
-            )}
+          <div className="min-w-0 flex-1 flex flex-col items-start gap-1">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+              {title}
+            </h1>
           </div>
           
           <div className="ml-auto flex items-center gap-3">
@@ -200,7 +197,7 @@ export function AppShell({
           </div>
         </header>
         
-        <main className="flex-1 px-4 pb-12 pt-2 md:px-10">{children}</main>
+        <main className="flex-1 px-4 pb-12 pt-6 md:px-10">{children}</main>
       </div>
     </div>
   );
