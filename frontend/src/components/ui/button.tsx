@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        default:
+          "group relative isolate overflow-hidden bg-white text-[#07111F] shadow-sm hover:shadow-[0_0_20px_rgba(163,230,53,0.5)] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-[#A3E635] before:to-[#84CC16] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:ease-out hover:text-[#07111F]",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
@@ -38,6 +40,27 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const isPrimary = variant === "default" || !variant;
+
+    if (isPrimary) {
+      const MotionComp = asChild
+        ? motion.create
+          ? motion.create(Slot as any)
+          : (motion as any)(Slot)
+        : motion.button;
+
+      return (
+        <MotionComp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          whileHover={{ y: -2, scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          {...props}
+        />
+      );
+    }
+
     const Comp = asChild ? Slot : "button";
     return (
       <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
