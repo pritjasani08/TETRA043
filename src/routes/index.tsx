@@ -174,10 +174,10 @@ function AgriShieldLandingPage() {
           </div>
 
           {/* Heading */}
-          <h1 className="font-instrument italic font-light text-white text-4xl sm:text-6xl md:text-8xl lg:text-[110px] leading-[0.95] md:leading-[0.9] tracking-tight text-center text-glow select-text">
+          <h1 className="font-inter font-bold text-white text-4xl sm:text-5xl md:text-6xl lg:text-[72px] leading-tight tracking-tight text-center text-glow select-text">
             Your fields.
             <br />
-            Watched all night.
+            Secured around the clock.
           </h1>
 
           {/* Elegant Description */}
