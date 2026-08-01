@@ -1,19 +1,19 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect } from "react";
 
-import { useAppState } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import type { Severity } from "@/lib/agrishield-data";
 
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { ready, authed } = useAppState();
+  const { isAuthed, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (ready && !authed) navigate({ to: "/auth", replace: true });
-  }, [ready, authed, navigate]);
+    if (!isLoading && !isAuthed) navigate({ to: "/auth", replace: true });
+  }, [isLoading, isAuthed, navigate]);
 
-  if (!ready || !authed) {
+  if (isLoading || !isAuthed) {
     return (
       <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">
         Loading secure console…
@@ -43,29 +43,29 @@ export function StatCard({
     danger: "text-destructive",
   } as const;
   return (
-    <div className="panel p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="panel p-6">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-medium text-muted-foreground">
           {label}
         </p>
-        {icon && <span className="text-muted-foreground">{icon}</span>}
+        {icon && <span className={cn("p-2 rounded-2xl bg-muted/50", tones[tone])}>{icon}</span>}
       </div>
-      <p className={cn("mt-2 font-display text-2xl font-bold", tones[tone])}>{value}</p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+      <p className={cn("mt-4 font-display text-4xl font-bold tracking-tight", tones[tone])}>{value}</p>
+      {hint && <p className="mt-2 text-xs font-medium text-muted-foreground/80">{hint}</p>}
     </div>
   );
 }
 
 export function RiskPill({ level }: { level: Severity }) {
   const map = {
-    high: "border-destructive/40 bg-destructive/15 text-destructive",
-    medium: "border-warning/40 bg-warning/15 text-warning",
-    low: "border-primary/40 bg-primary/15 text-primary",
+    high: "border-destructive/30 bg-destructive/10 text-destructive",
+    medium: "border-warning/30 bg-warning/10 text-warning",
+    low: "border-primary/30 bg-primary/10 text-primary",
   } as const;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider",
+        "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-widest shadow-sm",
         map[level],
       )}
     >
@@ -89,13 +89,13 @@ export function PanelSection({
   right?: ReactNode;
 }) {
   return (
-    <section className={cn("panel p-5", className)}>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+    <section className={cn("panel p-6 sm:p-8", className)}>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="font-display text-base font-semibold">{title}</h2>
-          {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          <h2 className="font-display text-lg font-bold tracking-tight text-foreground">{title}</h2>
+          {description && <p className="mt-1 text-sm font-medium text-muted-foreground">{description}</p>}
         </div>
-        {right}
+        {right && <div className="shrink-0">{right}</div>}
       </div>
       {children}
     </section>

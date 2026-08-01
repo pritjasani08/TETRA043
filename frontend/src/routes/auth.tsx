@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAppState } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -21,7 +23,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { login, authed, ready } = useAppState();
+  const { ready } = useAppState();
+  const { login, signup: signupAuth, isAuthed, isLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,10 +36,10 @@ function AuthPage() {
   });
 
   useEffect(() => {
-    if (ready && authed) {
+    if (ready && isAuthed) {
       navigate({ to: "/dashboard", replace: true });
     }
-  }, [ready, authed, navigate]);
+  }, [ready, isAuthed, navigate]);
 
   const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -73,6 +76,10 @@ function AuthPage() {
     toast.success("Welcome back", { description: "Monitoring console unlocked." });
     navigate({ to: "/dashboard" });
   };
+
+  const [email, setEmail] = useState("ramesh@agrishield.in");
+  const [password, setPassword] = useState("demo1234");
+  const [pending, setPending] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row bg-[#07111F] text-white overflow-hidden relative selection:bg-[#A3E635]/30">
