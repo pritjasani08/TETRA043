@@ -328,9 +328,6 @@ export function DashboardSection() {
             <DashboardMockupCard {...edgeIntelProps} />
           </ScrollStackItem>
           <ScrollStackItem>
-            <DashboardMockupCard {...villageNetworkProps} />
-          </ScrollStackItem>
-          <ScrollStackItem>
             <DashboardMockupCard {...sirenControllerProps} />
           </ScrollStackItem>
         </ScrollStack>
