@@ -83,7 +83,7 @@ const edgeIntelProps: DashboardMockupCardProps = {
       icon: Camera,
       gradFrom: "from-emerald-500",
       gradTo: "to-teal-600",
-      xPosClass: "-left-6",
+      xPosClass: "left-3",
       yPosClass: "top-24",
     },
   ],
@@ -326,9 +326,6 @@ export function DashboardSection() {
         >
           <ScrollStackItem>
             <DashboardMockupCard {...edgeIntelProps} />
-          </ScrollStackItem>
-          <ScrollStackItem>
-            <DashboardMockupCard {...villageNetworkProps} />
           </ScrollStackItem>
           <ScrollStackItem>
             <DashboardMockupCard {...sirenControllerProps} />

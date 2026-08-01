@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   ArrowRight,
+  ArrowUp,
   Sparkles,
   Compass,
   ShieldCheck,
@@ -15,6 +16,8 @@ import {
 } from "lucide-react";
 import MagicRings from "../components/MagicRings";
 import { DashboardSection } from "../components/DashboardSection";
+import { Button } from "../components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,7 +41,21 @@ export const Route = createFileRoute("/")({
 
 function AgriShieldLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { label: "Overview", to: "#overview" },
@@ -77,12 +94,15 @@ function AgriShieldLandingPage() {
 
           {/* Desktop Right CTA */}
           <div className="hidden md:block">
-            <Link
-              to="/auth"
-              className="bg-white text-black px-6 py-2.5 rounded-full font-semibold text-xs uppercase tracking-widest hover:bg-white/90 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] shadow-md shadow-white/5 hover:shadow-white/10 inline-block text-center"
+            <Button
+              asChild
+              className="px-6 py-2.5 rounded-full font-semibold text-xs uppercase tracking-widest inline-flex"
             >
-              Enter Console
-            </Link>
+              <Link to="/auth">
+                Get Started
+                <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
+              </Link>
+            </Button>
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -92,19 +112,16 @@ function AgriShieldLandingPage() {
             aria-label="Toggle Menu"
           >
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "rotate-45 translate-y-[8px]" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "rotate-45 translate-y-[8px]" : ""
+                }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "opacity-0 scale-0" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "opacity-0 scale-0" : ""
+                }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isMenuOpen ? "-rotate-45 -translate-y-[8px]" : ""
-              }`}
+              className={`w-6 h-0.5 bg-white rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "-rotate-45 -translate-y-[8px]" : ""
+                }`}
             />
           </button>
         </div>
@@ -112,9 +129,8 @@ function AgriShieldLandingPage() {
 
       {/* Mobile Slide-in Menu Panel */}
       <div
-        className={`fixed top-0 right-0 bottom-0 z-40 w-[85%] max-w-[340px] bg-[#0a0608]/98 backdrop-blur-2xl border-l border-white/10 p-8 pt-28 flex flex-col justify-between shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 bottom-0 z-40 w-[85%] max-w-[340px] bg-[#0a0608]/98 backdrop-blur-2xl border-l border-white/10 p-8 pt-28 flex flex-col justify-between shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col gap-8">
           {navLinks.map((link, i) => (
@@ -125,25 +141,26 @@ function AgriShieldLandingPage() {
               style={{
                 transitionDelay: `${150 + i * 75}ms`,
               }}
-              className={`text-xl font-light tracking-wide hover:text-white/80 transition-all duration-500 transform ${
-                isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-              }`}
+              className={`text-xl font-light tracking-wide hover:text-white/80 transition-all duration-500 transform ${isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+                }`}
             >
               {link.label}
             </a>
           ))}
         </div>
 
-        <Link
-          to="/auth"
-          onClick={() => setIsMenuOpen(false)}
-          style={{ transitionDelay: "375ms" }}
-          className={`w-full bg-white text-black py-4 rounded-full font-semibold text-xs uppercase tracking-widest hover:bg-white/90 transition-all duration-500 text-center block shadow-lg shadow-white/5 hover:shadow-white/10 ${
+        <Button
+          asChild
+          className={`w-full py-4 rounded-full font-semibold text-xs uppercase tracking-widest ${
             isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
           }`}
+          style={{ transitionDelay: "375ms" }}
         >
-          Enter Console
-        </Link>
+          <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+            Get Started
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
+          </Link>
+        </Button>
       </div>
 
       {/* SECTION 1: Hero */}
@@ -174,10 +191,10 @@ function AgriShieldLandingPage() {
           </div>
 
           {/* Heading */}
-          <h1 className="font-instrument italic font-light text-white text-4xl sm:text-6xl md:text-8xl lg:text-[110px] leading-[0.95] md:leading-[0.9] tracking-tight text-center text-glow select-text">
+          <h1 className="font-inter font-bold text-white text-4xl sm:text-5xl md:text-6xl lg:text-[72px] leading-tight tracking-tight text-center text-glow select-text">
             Your fields.
             <br />
-            Watched all night.
+            Secured around the clock.
           </h1>
 
           {/* Elegant Description */}
@@ -188,12 +205,15 @@ function AgriShieldLandingPage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8 md:mt-10">
-            <Link
-              to="/auth"
-              className="bg-white text-black px-10 py-4 rounded-full font-semibold text-xs uppercase tracking-widest hover:bg-white/95 transition-all duration-300 button-glow hover:scale-[1.05] active:scale-[0.98] text-center shadow-lg hover:shadow-white/10"
+            <Button
+              asChild
+              className="px-10 py-6 rounded-full font-semibold text-xs uppercase tracking-widest button-glow"
             >
-              Enter Console
-            </Link>
+              <Link to="/auth">
+                Get Started
+                <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
+              </Link>
+            </Button>
             <button
               onClick={() => {
                 const element = document.getElementById("overview");
@@ -502,19 +522,22 @@ function AgriShieldLandingPage() {
               </div>
 
               <div className="mt-8 md:mt-10 flex flex-wrap gap-4 items-center">
-                <Link
-                  to="/auth"
-                  className="bg-white text-black px-8 py-3.5 rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-white/90 transition-all duration-300 inline-block text-center shadow-lg shadow-white/5 hover:shadow-white/10"
+                <Button
+                  asChild
+                  className="px-8 py-6 rounded-full text-xs font-semibold uppercase tracking-widest inline-flex"
                 >
-                  Join Safety Network
-                </Link>
-                <a
-                  href="#overview"
+                  <Link to="/community">
+                    Join Safety Network
+                    <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
+                  </Link>
+                </Button>
+                <Link
+                  to="/detection"
                   className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-white transition-colors duration-300"
                 >
                   <span>Deterrent Sourcing Guide</span>
                   <ArrowRight className="size-3.5" />
-                </a>
+                </Link>
               </div>
             </div>
             <div className="md:w-1/2 min-h-[350px] relative overflow-hidden flex flex-col">
@@ -695,25 +718,34 @@ function AgriShieldLandingPage() {
             </div>
           </div>
 
-          {/* Scroll to Top Button in middle center */}
-          <div className="flex justify-center mb-6">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary hover:text-black flex items-center justify-center transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 text-primary group cursor-pointer"
-              aria-label="Scroll to Top"
-            >
-              <ArrowRight className="-rotate-90 size-4 group-hover:scale-110 transition-transform" />
-            </button>
-          </div>
         </div>
 
         {/* Giant Text Banner - Spanning full viewport width with increased visibility */}
-        <div className="w-full overflow-hidden select-none pointer-events-none mt-4 text-center">
-          <h1 className="font-['Space_Grotesk'] font-black tracking-tighter leading-none text-center select-none uppercase text-[15vw] bg-gradient-to-t from-primary via-primary/70 to-primary/10 bg-clip-text text-transparent opacity-95 translate-y-[2vw]">
+        <div className="w-full overflow-hidden select-none pointer-events-none mt-4 text-center pb-[35px] md:pb-[50px] lg:pb-[80px]">
+          <h1 className="font-['Space_Grotesk'] font-black tracking-tighter leading-none text-center select-none uppercase text-[15vw] bg-gradient-to-t from-primary via-primary/70 to-primary/10 bg-clip-text text-transparent opacity-95">
             AGRISHIELD AI
           </h1>
         </div>
       </footer>
+
+      {/* Floating Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed z-50 bottom-5 right-5 md:bottom-6 md:right-6 lg:bottom-8 lg:right-8 w-14 h-14 rounded-full bg-[#A3E635] text-[#07111F] flex items-center justify-center shadow-[0_8px_30px_rgba(163,230,53,0.3)] hover:shadow-[0_8px_35px_rgba(163,230,53,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0608] focus-visible:ring-[#A3E635] group"
+            whileHover={{ y: -4, scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="size-6 transition-transform duration-300 group-hover:-translate-y-1" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
