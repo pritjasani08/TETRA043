@@ -26,7 +26,10 @@ All SQL queries are executed manually using parameterized queries.
 erDiagram
     users ||--o{ detections : "monitors (future scope)"
     users ||--o| user_settings : "has one"
+    users ||--o{ notifications : "receives"
+    users ||--o{ device_tokens : "owns"
     detections ||--o{ alerts : "triggers"
+    detections ||--o{ notifications : "generates"
 
     users {
         UUID id PK
@@ -58,6 +61,32 @@ erDiagram
         VARCHAR theme
         TIMESTAMP created_at
         TIMESTAMP updated_at
+    }
+
+    device_tokens {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR device_token
+        VARCHAR platform
+        VARCHAR device_name
+        VARCHAR app_version
+        TIMESTAMP last_used_at
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    notifications {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR type
+        VARCHAR title
+        TEXT message
+        VARCHAR priority
+        UUID related_detection_id FK
+        JSONB metadata
+        BOOLEAN is_read
+        TIMESTAMP created_at
+        TIMESTAMP read_at
     }
 
     detections {

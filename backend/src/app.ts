@@ -13,6 +13,7 @@ import { detectionRoutes } from './modules/detection';
 import { analyticsRoutes } from './modules/analytics';
 import { profileRoutes } from './modules/profile';
 import { settingsRoutes } from './modules/settings';
+import { notificationRoutes, deviceTokenRoutes } from './modules/notification';
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.use('/api/v1/detections', detectionRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/profile', profileRoutes);
 app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/device-tokens', deviceTokenRoutes);
 
 // Catch-all for 404
 app.use(notFoundHandler);
