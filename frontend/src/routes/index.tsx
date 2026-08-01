@@ -526,18 +526,18 @@ function AgriShieldLandingPage() {
                   asChild
                   className="px-8 py-6 rounded-full text-xs font-semibold uppercase tracking-widest inline-flex"
                 >
-                  <Link to="/auth">
+                  <Link to="/community">
                     Join Safety Network
                     <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-[6px]" />
                   </Link>
                 </Button>
-                <a
-                  href="#overview"
+                <Link
+                  to="/detection"
                   className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50 hover:text-white transition-colors duration-300"
                 >
                   <span>Deterrent Sourcing Guide</span>
                   <ArrowRight className="size-3.5" />
-                </a>
+                </Link>
               </div>
             </div>
             <div className="md:w-1/2 min-h-[350px] relative overflow-hidden flex flex-col">
