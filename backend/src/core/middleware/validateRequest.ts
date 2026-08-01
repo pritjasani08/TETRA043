@@ -13,6 +13,7 @@ export const validateRequest = (schema: ZodSchema) =>
       });
       next();
     } catch (error) {
+      console.error('Validation failed:', JSON.stringify(error, null, 2));
       next(error);
     }
   };

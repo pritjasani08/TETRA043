@@ -21,6 +21,14 @@
 - `POST /api/v1/auth/logout`: Discards session.
 - `GET /api/v1/auth/me`: Retrieves current user profile. **Requires Authentication header (`Bearer <token>`)**.
 
+### Profile
+- `GET /api/v1/profile`: Retrieves the full user profile including farm details. **Requires Authentication header**.
+- `PUT /api/v1/profile`: Updates the user profile. Accepts partial updates (e.g. `phone`, `village`, `farmSize`). **Requires Authentication header**.
+
+### Settings
+- `GET /api/v1/settings`: Retrieves the user's application settings. **Requires Authentication header**.
+- `PUT /api/v1/settings`: Updates the user's settings. Accepts partial updates (e.g. `language`, `theme`, `alertVolume`). **Requires Authentication header**.
+
 ### Standard Response Format
 Every endpoint guarantees this `ApiResponse` format:
 ```json

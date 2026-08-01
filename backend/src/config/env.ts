@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters long'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   BCRYPT_ROUNDS: z.string().default('10').transform(Number),
+  DATABASE_PROVIDER: z.enum(['postgres', 'mock']).default('postgres'),
 });
 
 const _env = envSchema.safeParse(process.env);
