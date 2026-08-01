@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Users,
   Menu,
+  ArrowUp,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -102,6 +103,20 @@ export function AppShell({
     return () => window.clearInterval(id);
   }, [systemOn, offSince]);
 
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* Floating Sidebar */}
@@ -153,10 +168,10 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Seamless Header */}
-        <header className="sticky top-4 z-40 mx-4 md:mx-10 mb-6 flex flex-wrap items-center gap-4 bg-white/70 px-6 py-4 backdrop-blur-xl border border-white/80 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
+        <header className="sticky top-4 z-40 mx-4 md:mx-10 mb-6 flex flex-wrap items-center gap-4 bg-white/10 px-6 py-4 backdrop-blur-[32px] border border-white/40 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl lg:hidden bg-white shadow-sm border-border">
+              <Button variant="outline" size="icon" className="rounded-xl lg:hidden bg-white/30 shadow-sm border-border backdrop-blur-md">
                 <Menu className="size-5 text-foreground" />
               </Button>
             </SheetTrigger>
@@ -199,6 +214,19 @@ export function AppShell({
         
         <main className="flex-1 px-4 pb-12 pt-6 md:px-10">{children}</main>
       </div>
+
+      {/* Scroll to Top Button */}
+      <Button
+        variant="default"
+        size="icon"
+        onClick={scrollToTop}
+        className={cn(
+          "fixed bottom-6 right-6 z-50 rounded-full shadow-lg transition-all duration-300",
+          showScrollTop ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"
+        )}
+      >
+        <ArrowUp className="size-5" />
+      </Button>
     </div>
   );
 }
