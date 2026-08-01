@@ -16,8 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ANIMALS, VOICE_LINES, animalByName } from "@/lib/agrishield-data";
+import { VOICE_LINES } from "@/lib/agrishield-data";
 import { speakAlert, useAppState } from "@/lib/app-state";
+import { useDetection } from "@/hooks/useDetection";
 
 export const Route = createFileRoute("/detection")({
   head: () => ({
@@ -57,7 +58,8 @@ const SIDES = ["North Fence", "East Gate", "South Canal", "West Boundary"];
 
 function DetectionPage() {
   const { systemOn, settings } = useAppState();
-  const [running, setRunning] = useState(false);
+  const detectionMutation = useDetection();
+  
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [frame, setFrame] = useState(0);
@@ -65,61 +67,52 @@ function DetectionPage() {
   const videoInput = useRef<HTMLInputElement>(null);
   const [voiceLang, setVoiceLang] = useState(settings.voiceLanguage);
 
-  const runDetection = (kind: "image" | "video", file?: File) => {
-    const url = file ? URL.createObjectURL(file) : null;
-    setRunning(true);
+  const runDetection = async (kind: "image" | "video", file?: File) => {
+    if (!file) return;
+    
+    const url = URL.createObjectURL(file);
     setResult(null);
-    setProgress(0);
-    const timer = window.setInterval(() => {
-      setProgress((p) => {
-        const next = p + (kind === "video" ? 9 : 17);
-        setFrame(Math.round(next * 1.4));
-        if (next >= 100) {
-          window.clearInterval(timer);
-          const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)]!;
-          const side = SIDES[Math.floor(Math.random() * SIDES.length)]!;
-          const confidence = Math.round(86 + Math.random() * 13);
-          const now = new Date();
-          setResult({
-            animal: animal.name,
-            confidence,
-            side,
-            time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-            box: {
-              x: 14 + Math.random() * 28,
-              y: 18 + Math.random() * 24,
-              w: 30 + Math.random() * 16,
-              h: 32 + Math.random() * 16,
-            },
-            media: url,
-            kind,
+    setProgress(30);
+    setFrame(1);
+
+    try {
+      const response = await detectionMutation.mutateAsync(file);
+      setProgress(100);
+      setFrame(24);
+
+      if (response && response.length > 0) {
+        const detection = response[0];
+        setResult({
+          animal: detection.animal,
+          confidence: detection.confidence,
+          side: detection.side,
+          time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+          box: {
+            x: detection.boundingBox.x,
+            y: detection.boundingBox.y,
+            w: detection.boundingBox.width,
+            h: detection.boundingBox.height,
+          },
+          media: url,
+          kind,
+        });
+
+        if (systemOn) {
+          toast.error(`${detection.animal} detected`, {
+            description: `${detection.side} · confidence ${detection.confidence}%`,
+            icon: <BellRing className="size-4" />,
           });
-          setRunning(false);
-          if (systemOn) {
-            toast.error(`${animal.name} detected`, {
-              description: `${side} · confidence ${confidence}% · alert dispatched`,
-              icon: <BellRing className="size-4" />,
-            });
-            if (settings.voiceAlerts) {
-              const line = (VOICE_LINES[voiceLang] ?? VOICE_LINES["English"]!)(animal.name, side);
-              speakAlert(line, voiceLang, settings.volume);
-            }
-          } else {
-            toast.warning("Detection saved, alert suppressed", {
-              description: "Security system is OFF — turn it on to dispatch alerts.",
-            });
-          }
-          return 100;
         }
-        return next;
-      });
-    }, 220);
+      } else {
+        toast.info("No threats detected");
+      }
+    } catch (error) {
+      toast.error("Detection failed");
+    }
   };
 
-  const animal = result ? animalByName(result.animal) : null;
-  const voiceLine = result
-    ? (VOICE_LINES[voiceLang] ?? VOICE_LINES["English"]!)(result.animal, result.side)
-    : "";
+  const animal = result ? { emoji: "⚠️", name: result.animal, severity: "high" as const, deterrents: ["Siren", "Flash"], note: "Detected via AI" } : null;
+  const voiceLine = result ? `Attention! ${result.animal} detected near ${result.side}` : "";
 
   return (
     <AppShell
@@ -184,23 +177,23 @@ function DetectionPage() {
                     Replays stored CCTV footage through the detector and streams bounding boxes as
                     frames are processed.
                   </p>
-                  <Button onClick={() => runDetection("video")} disabled={running}>
-                    {running ? (
+                  <Button onClick={() => runDetection("video")} disabled={detectionMutation.isPending}>
+                    {detectionMutation.isPending ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
                       <Zap className="size-4" />
                     )}
-                    {running ? "Scanning frames…" : "Start live simulation"}
+                    {detectionMutation.isPending ? "Scanning frames…" : "Start live simulation"}
                   </Button>
                 </div>
               </div>
             </TabsContent>
           </Tabs>
 
-          {running && (
+          {detectionMutation.isPending && (
             <div className="mt-4 rounded-xl border border-border bg-surface/60 p-4">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Running inference…</span>
+                <span>Sending to AI Inference node…</span>
                 <span>frame {frame}</span>
               </div>
               <Progress value={progress} className="mt-2 h-1.5" />

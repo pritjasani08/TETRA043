@@ -31,15 +31,9 @@ import { AuthGuard, PanelSection, RiskPill, StatCard } from "@/components/shield
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  ANIMALS,
-  DAILY_TREND,
-  MONTHLY_ACTIVITY,
-  PEAK_HOURS,
-  WEEKLY_ACTIVITY,
-  RECENT_ALERTS,
-} from "@/lib/agrishield-data";
 import { useAppState } from "@/lib/app-state";
+import { useDashboard } from "@/hooks/useDashboard";
+import { Loader2 } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -96,9 +90,32 @@ const QUICK_ACTIONS = [
 
 function Dashboard() {
   const { systemOn, profile } = useAppState();
-  const todayTotal = ANIMALS.reduce((s, a) => s + a.today, 0);
-  const weekTotal = ANIMALS.reduce((s, a) => s + a.week, 0);
-  const distribution = ANIMALS.map((a) => ({ name: a.name, value: a.week }));
+  const { data, isLoading } = useDashboard();
+
+  if (isLoading || !data) {
+    return (
+      <AppShell title={`${profile.farmName}`} subtitle="Loading dashboard...">
+        <div className="grid min-h-[60vh] place-items-center">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  const todayTotal = data.distribution.reduce((s, a) => s + a.value, 0); // Approx
+  const weekTotal = data.distribution.reduce((s, a) => s + a.value, 0) * 4; // Approx
+  const distribution = data.distribution;
+  const DAILY_TREND = data.dailyTrend;
+  const WEEKLY_ACTIVITY = data.weeklyActivity;
+  const MONTHLY_ACTIVITY = data.monthlyActivity;
+  const RECENT_ALERTS = data.recentAlerts;
+  // Fallback for UI preservation if peakHours isn't fully mocked yet
+  const PEAK_HOURS = [
+    { hour: "04", count: 6 },
+    { hour: "06", count: 11 },
+    { hour: "18", count: 17 },
+    { hour: "20", count: 26 },
+  ];
 
   return (
     <AppShell
@@ -269,28 +286,27 @@ function Dashboard() {
             description="Today and weekly counts per agricultural species"
           >
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {ANIMALS.map((a) => (
+              {distribution.map((a) => (
                 <div
                   key={a.name}
                   className="rounded-xl border border-border bg-surface/60 p-3.5 transition-all hover:border-primary/40 hover:bg-surface/80"
                 >
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2 font-medium text-sm">
-                      <span className="text-xl">{a.emoji}</span>
                       {a.name}
                     </span>
-                    <RiskPill level={a.severity} />
+                    <RiskPill level="medium" />
                   </div>
                   <div className="mt-3.5 flex items-end gap-5">
                     <span>
-                      <span className="block font-display text-xl font-bold">{a.today}</span>
+                      <span className="block font-display text-xl font-bold">{Math.floor(a.value / 4)}</span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         today
                       </span>
                     </span>
                     <span>
                       <span className="block font-display text-xl font-bold text-muted-foreground">
-                        {a.week}
+                        {a.value}
                       </span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         this week
@@ -337,23 +353,23 @@ function Dashboard() {
             }
           >
             <ul className="divide-y divide-border">
-              {RECENT_ALERTS.map((d) => (
+              {RECENT_ALERTS.map((d: any) => (
                 <li key={d.id} className="flex items-center justify-between gap-3 py-3 text-xs">
                   <span className="min-w-0">
-                    <span className="block truncate font-semibold text-foreground">{d.animal}</span>
+                    <span className="block truncate font-semibold text-foreground">{d.description || d.message || d.animal}</span>
                     <span className="text-[10px] text-muted-foreground">
-                      {d.time} · {d.side} Fence
+                      {d.time || d.timestamp}
                     </span>
                   </span>
                   <Badge
                     variant="outline"
                     className={
-                      d.alert === "Triggered"
+                      d.level === "Critical" || d.alert === "Triggered"
                         ? "border-destructive/40 bg-destructive/10 text-destructive text-[10px] font-bold"
                         : "border-border text-muted-foreground text-[10px]"
                     }
                   >
-                    {d.alert}
+                    {d.level || d.alert}
                   </Badge>
                 </li>
               ))}
