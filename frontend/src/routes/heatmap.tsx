@@ -128,7 +128,11 @@ function HeatmapPage() {
                         >
                           <span className="size-2 rounded-full bg-white/80 animate-ping" />
                         </div>
-                        <MarkerLabel position="bottom" className="font-bold text-xs bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-full mt-1 border border-border text-foreground">{r.name}</MarkerLabel>
+                        <MarkerLabel position="bottom">
+                          <div className="font-bold text-xs bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-full mt-1 border border-border text-foreground">
+                            {r.name}
+                          </div>
+                        </MarkerLabel>
                       </MarkerContent>
 
                       <MarkerPopup className="w-72 p-0 rounded-2xl overflow-hidden border-none shadow-2xl">

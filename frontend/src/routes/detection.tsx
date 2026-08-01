@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BellRing, FileVideo, ImageUp, Loader2, Radar, Volume2, Zap, Play, UploadCloud } from "lucide-react";
+import { BellRing, FileVideo, ImageUp, Loader2, Radar, Volume2, Zap, Play, UploadCloud, AlertTriangle, Camera, ShieldCheck } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VOICE_LINES } from "@/lib/agrishield-data";
+import { VOICE_LINES, ANIMALS } from "@/lib/agrishield-data";
 import { speakAlert, useAppState } from "@/lib/app-state";
 import { useDetection } from "@/hooks/useDetection";
 
@@ -49,6 +49,7 @@ function DetectionPage() {
   const { systemOn, settings } = useAppState();
   const detectionMutation = useDetection();
   
+  const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [frame, setFrame] = useState(0);

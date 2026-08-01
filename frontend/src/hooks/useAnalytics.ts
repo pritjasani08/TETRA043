@@ -7,7 +7,36 @@ export function useAnalytics() {
   return useQuery({
     queryKey: queryKeys.analytics.summary,
     queryFn: async () => {
-      const data = await AnalyticsService.getSummary() as AnalyticsSummaryDto;
+      // Mock data for hackathon demo since backend DB is not configured
+      const data = {
+        totalIntrusions: 342,
+        deterrenceRate: 94.5,
+        avgResponseTime: 2.1,
+        falsePositives: 5.2,
+        dailyTrend: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], series: [12, 19, 8, 22, 14, 31, 10] },
+        weeklyTrend: { labels: ['W1', 'W2', 'W3', 'W4'], series: [145, 132, 158, 141] },
+        monthlyTrend: { labels: ['Jan', 'Feb', 'Mar', 'Apr'], series: [420, 450, 390, 410] },
+        animalDistribution: [
+          { label: 'Wild Boar', value: 45 },
+          { label: 'Nilgai', value: 30 },
+          { label: 'Monkey', value: 15 },
+          { label: 'Stray Cattle', value: 10 },
+        ],
+        confidenceDistribution: [
+          { bracket: '90-100%', count: 180 },
+          { bracket: '80-89%', count: 85 },
+          { bracket: '70-79%', count: 42 },
+          { bracket: '<70%', count: 15 },
+        ],
+        peakDetectionHours: [
+          { hourRange: '00:00', intensity: 'High' },
+          { hourRange: '04:00', intensity: 'Medium' },
+          { hourRange: '08:00', intensity: 'Low' },
+          { hourRange: '12:00', intensity: 'Low' },
+          { hourRange: '16:00', intensity: 'Medium' },
+          { hourRange: '20:00', intensity: 'High' },
+        ]
+      } as unknown as AnalyticsSummaryDto;
 
       const dailyTrend = data.dailyTrend.labels.map((label, i) => ({
         day: label,

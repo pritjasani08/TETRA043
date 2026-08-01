@@ -7,7 +7,29 @@ export function useDashboard() {
   return useQuery({
     queryKey: queryKeys.dashboard.summary,
     queryFn: async () => {
-      const data = await DashboardService.getSummary() as DashboardSummaryDto;
+      // Mock data for hackathon demo since backend DB is not configured
+      const data = {
+        stats: {
+          totalIntrusions: 142,
+          deterred: 138,
+          activeNodes: 12,
+          offlineNodes: 0,
+        },
+        recentAlerts: [
+          { id: '1', species: 'Wild Boar', location: 'North Fence', timestamp: new Date().toISOString(), status: 'deterred' },
+          { id: '2', species: 'Nilgai', location: 'East Gate', timestamp: new Date(Date.now() - 3600000).toISOString(), status: 'deterred' },
+        ],
+        charts: {
+          dailyTrend: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], series: [4, 7, 2, 8, 5, 12, 3] },
+          weeklyTrend: { labels: ['W1', 'W2', 'W3', 'W4'], series: [45, 32, 58, 41] },
+          monthlyTrend: { labels: ['Jan', 'Feb', 'Mar', 'Apr'], series: [120, 150, 90, 110] },
+          animalDistribution: [
+            { species: 'Wild Boar', value: 45 },
+            { species: 'Nilgai', value: 30 },
+            { species: 'Stray Cattle', value: 25 },
+          ]
+        }
+      } as unknown as DashboardSummaryDto;
 
       // Map backend DTOs to Recharts compatible arrays
       const dailyTrend = data.charts.dailyTrend.labels.map((label, i) => ({

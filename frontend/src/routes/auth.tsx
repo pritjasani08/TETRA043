@@ -48,6 +48,7 @@ function AuthPage() {
     village: "",
     district: "",
     state: "Gujarat",
+    farmName: "",
     farmSize: "",
     cropType: "",
     password: "",
@@ -206,7 +207,7 @@ function AuthPage() {
                       <Input
                         id={key}
                         placeholder={ph}
-                        value={signup[key]}
+                        value={signup[key as keyof typeof signup] as string}
                         onChange={(e) => setSignup((s) => ({ ...s, [key]: e.target.value }))}
                       />
                     </div>

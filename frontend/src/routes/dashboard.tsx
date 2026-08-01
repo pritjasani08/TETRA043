@@ -234,7 +234,7 @@ function Dashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                        A <strong className="text-foreground font-bold">{latestAlert.animal}</strong> was safely deterred near the <strong className="text-foreground font-bold">{latestAlert.side} fence</strong> at {latestAlert.time}.
+                        A <strong className="text-foreground font-bold">{(latestAlert as any).animal || 'Animal'}</strong> was safely deterred near the <strong className="text-foreground font-bold">{(latestAlert as any).side || 'fence'}</strong> at {(latestAlert as any).time || 'recently'}.
                       </p>
                       <Button variant="outline" size="sm" className="mt-4 h-9 text-xs font-bold rounded-xl w-full group-hover:bg-warning/5 group-hover:text-warning group-hover:border-warning/20 transition-all">
                         Review Event Recording
@@ -294,18 +294,19 @@ function Dashboard() {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">Recent Activity</h3>
-                    <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-                      {latestAlert.description} ({latestAlert.time})
-                    </p>
-                    <div className="mt-3 flex items-center gap-3">
-                      <Button variant="outline" size="sm" className="h-8 text-xs rounded-full">View Recording</Button>
-                    </div>
+                  <div className="flex flex-col gap-3 flex-1">
+                     {distribution.slice(0,3).map((d, i) => (
+                        <div key={d.name} className="flex justify-between items-center text-sm font-medium">
+                           <div className="flex items-center gap-2">
+                              <span className="size-3 rounded-full" style={{ backgroundColor: i === 0 ? "var(--warning)" : i === 1 ? "var(--primary)" : "var(--accent)" }} />
+                              <span className="text-foreground">{d.name}</span>
+                           </div>
+                           <span className="text-muted-foreground font-bold">{d.value}</span>
+                        </div>
+                     ))}
                   </div>
                 </div>
-              </div>
-            )}
+            </PanelSection>
 
             {/* Recommendations / Assistant */}
             <PanelSection title="Smart Recommendations" className="bg-primary/5 border-primary/10">
@@ -363,7 +364,6 @@ function Dashboard() {
               ))}
             </div>
           </PanelSection>
-          </div>
         </div>
 
         {/* Right Side: System Logs & Recent Alerts */}
@@ -475,6 +475,7 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
         </PanelSection>
+      </div>
       </div>
     </AppShell>
   );

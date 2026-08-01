@@ -18,6 +18,8 @@ import {
 
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, StatCard } from "@/components/shield-ui";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { Loader2 } from "lucide-react";
 import {
   ANIMALS,
   DETECTIONS,
@@ -154,7 +156,7 @@ function AnalyticsPage() {
                     cornerRadius={8}
                     stroke="none"
                   >
-                    {distribution.map((_, i) => (
+                    {distribution.map((_: any, i: number) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
@@ -208,7 +210,7 @@ function AnalyticsPage() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
                   <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--muted)', opacity: 0.1 }} />
                   <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                    {PEAK_HOURS.map((h, i) => (
+                    {PEAK_HOURS.map((h: any, i: number) => (
                       <Cell key={i} fill={h.count > 18 ? "var(--warning)" : "var(--primary)"} opacity={h.count > 18 ? 1 : 0.6} />
                     ))}
                   </Bar>
