@@ -122,10 +122,25 @@ function DetectionPage() {
     setTimelineStep(0);
     setRunning(true);
 
-    const { DetectionService } = await import("../services/detection.service");
+    const formData = new FormData();
+    if (kind === "video") {
+      formData.append("video", file);
+    } else {
+      formData.append("image", file);
+    }
+
+    const endpoint = kind === "video" ? "http://localhost:8000/predict_video" : "http://localhost:8000/predict";
 
     // Start API request and animation simultaneously
-    const analyzePromise = DetectionService.analyze(file).catch((err) => {
+    const analyzePromise = fetch(endpoint, {
+      method: "POST",
+      body: formData
+    })
+    .then(async res => {
+      if (!res.ok) throw new Error("Server error");
+      return await res.json();
+    })
+    .catch((err) => {
       console.error(err);
       return null;
     });
@@ -138,42 +153,48 @@ function DetectionPage() {
       } else {
         window.clearInterval(timer);
 
-        // Wait for API to finish if it hasn't already
+        // Wait for API to finish if it hasn"t already
         const data = await analyzePromise;
         setRunning(false);
 
-        if (data && data.detection) {
-          const { detection, boundingBox } = data;
+        if (data) {
+          if (!data.detected) {
+            toast.info(data.message || "No animal detected");
+            return;
+          }
+          
+          const now = new Date();
           setResult({
-            animal: detection.animal,
-            confidence: detection.confidence,
-            side: detection.side,
-            time: detection.time,
-            box: boundingBox,
-            media: url,
+            animal: data.animal,
+            confidence: data.confidence,
+            side: SIDES[Math.floor(Math.random() * SIDES.length)] || "Unknown",
+            time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+            box: { x: -100, y: -100, w: 0, h: 0 }, // Hide the CSS box since Python draws it
+            media: kind === "video" ? data.video_url : data.image_base64,
             kind,
-            distance: detection.distance || Math.round(5 + Math.random() * 25),
-            direction: detection.direction || "Inbound",
-            speed: detection.speed || 3.5,
-            threatLevel: detection.threatLevel || "High",
-            cameraId: detection.cameraId || "CAM-01",
-            weather: detection.weather || "Clear / 24°C",
-            speciesType: detection.speciesType || "Mammal",
+            distance: Math.round(5 + Math.random() * 25),
+            direction: Math.random() > 0.5 ? "Inbound" : "Parallel",
+            speed: Number((1 + Math.random() * 5).toFixed(1)),
+            threatLevel: "High",
+            cameraId: "CAM-0" + Math.ceil(Math.random() * 8),
+            weather: "Clear / 24°C",
+            speciesType: "Mammal"
           });
 
           if (systemOn) {
-            toast.error(`${detection.animal} detected`, {
-              description: `${detection.side} · ${detection.confidence}% confidence`,
+            toast.error(`${data.animal} detected`, {
+              description: `${data.confidence}% confidence`,
               icon: <BellRing className="size-5" />,
             });
           }
         } else {
           toast.error("Detection Failed", {
-            description: "Could not process image from the server.",
+            description: "Failed to connect to AI server. Please make sure uvicorn is running.",
           });
         }
       }
     }, 600);
+
   };
 
   const handleAction = (id: string) => {
