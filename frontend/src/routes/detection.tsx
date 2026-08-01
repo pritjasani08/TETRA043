@@ -87,52 +87,71 @@ function DetectionPage() {
   const runDetection = async (kind: "image" | "video", file?: File) => {
     if (!file) return;
     
-    const url = URL.createObjectURL(file);
     setResult(null);
     setTimelineStep(0);
     setRunning(true);
     
-    let currentStep = 0;
-    const timer = window.setInterval(() => {
-      currentStep++;
-      if (currentStep < TIMELINE_STEPS.length) {
-        setTimelineStep(currentStep);
+    try {
+      const formData = new FormData();
+      if (kind === "video") {
+        formData.append('video', file);
       } else {
-        window.clearInterval(timer);
-        const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)]!;
-        const side = SIDES[Math.floor(Math.random() * SIDES.length)]!;
-        const confidence = Math.round(86 + Math.random() * 13);
-        const now = new Date();
-        setResult({
-          animal: animal.name,
-          confidence,
-          side,
-          time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-          box: {
-            x: 20 + Math.random() * 20,
-            y: 20 + Math.random() * 20,
-            w: 25 + Math.random() * 15,
-            h: 30 + Math.random() * 15,
-          },
-          media: url,
-          kind,
-          distance: Math.round(5 + Math.random() * 25),
-          direction: Math.random() > 0.5 ? "Inbound" : "Parallel",
-          speed: Number((1 + Math.random() * 5).toFixed(1)),
-          threatLevel: "High",
-          cameraId: "CAM-0" + Math.ceil(Math.random() * 8),
-          weather: "Clear / 24°C",
-          speciesType: "Mammal"
-        });
-        setRunning(false);
-        if (systemOn) {
-          toast.error(`${animal.name} detected`, {
-            description: `${side} · ${confidence}% confidence`,
-            icon: <BellRing className="size-5" />,
-          });
-        }
+        formData.append('image', file);
       }
-    }, 600);
+      
+      setTimelineStep(1); // Preprocess
+      
+      const endpoint = kind === "video" ? 'http://localhost:8000/predict_video' : 'http://localhost:8000/predict';
+      
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: formData
+      });
+      
+      setTimelineStep(3); // Threat Calc
+      
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
+      
+      const data = await res.json();
+      setTimelineStep(5); // Ready
+      
+      if (!data.detected) {
+        toast.info(data.message || "No animal detected");
+        setRunning(false);
+        return;
+      }
+      
+      const now = new Date();
+      setResult({
+        animal: data.animal,
+        confidence: data.confidence,
+        side: SIDES[Math.floor(Math.random() * SIDES.length)]!,
+        time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+        box: { x: -100, y: -100, w: 0, h: 0 }, // Hide the CSS box since Python draws it
+        media: kind === "video" ? data.video_url : data.image_base64,
+        kind,
+        distance: Math.round(5 + Math.random() * 25),
+        direction: Math.random() > 0.5 ? "Inbound" : "Parallel",
+        speed: Number((1 + Math.random() * 5).toFixed(1)),
+        threatLevel: "High",
+        cameraId: "CAM-0" + Math.ceil(Math.random() * 8),
+        weather: "Clear / 24°C",
+        speciesType: "Mammal"
+      });
+      
+      setRunning(false);
+      if (systemOn) {
+        toast.error(`${data.animal} detected`, {
+          description: `${data.confidence}% confidence`,
+          icon: <BellRing className="size-5" />,
+        });
+      }
+    } catch(err) {
+      toast.error("Failed to connect to AI server. Please make sure uvicorn is running.");
+      setRunning(false);
+    }
   };
 
   const handleAction = (id: string) => {
