@@ -146,12 +146,13 @@
   /* Massive, ultra-soft drop shadow */
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.02);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.05), 0 2px 5px rgba(0,0,0,0.02);
+  }
 }
-
-@utility panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.05), 0 2px 5px rgba(0,0,0,0.02);
-}
+@utility text-gradient {
   background: linear-gradient(92deg, var(--primary), var(--warning));
   -webkit-background-clip: text;
   background-clip: text;
