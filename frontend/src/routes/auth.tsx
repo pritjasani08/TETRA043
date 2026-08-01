@@ -69,12 +69,15 @@ function AuthPage() {
 
     setLoading(true);
 
-    // Simulate network request
-    await new Promise(r => setTimeout(r, 1200));
-
-    login();
-    toast.success("Welcome back", { description: "Monitoring console unlocked." });
-    navigate({ to: "/dashboard" });
+    try {
+      await login({ email: "demo@agrishield.in", password: "demo1234" });
+      toast.success("Welcome back", { description: "Monitoring console unlocked." });
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error("Login Failed", { description: err.message || "Invalid credentials" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const [email, setEmail] = useState("ramesh@agrishield.in");

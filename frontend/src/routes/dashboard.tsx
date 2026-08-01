@@ -304,8 +304,7 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+            </PanelSection>
 
             {/* Recommendations / Assistant */}
             <PanelSection title="Smart Recommendations" className="bg-primary/5 border-primary/10">
