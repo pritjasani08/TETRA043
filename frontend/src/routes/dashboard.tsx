@@ -24,11 +24,13 @@ import {
 
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, RiskPill } from "@/components/shield-ui";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAppState } from "@/lib/app-state";
 import { useDashboard } from "@/hooks/useDashboard";
 import { Loader2 } from "lucide-react";
+import { BarChart, Bar } from "recharts";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -78,6 +80,13 @@ function Dashboard() {
     { hour: "18", count: 17 },
     { hour: "20", count: 26 },
   ];
+  
+  const latestAlert = RECENT_ALERTS?.[0];
+  const statusBg = systemOn ? "bg-primary/15" : "bg-destructive/15";
+  const statusIcon = systemOn ? <ShieldCheck className="size-6 text-primary" /> : <AlertTriangle className="size-6 text-destructive" />;
+  const statusTitle = systemOn ? "System Armed" : "System Offline";
+  const statusDesc = systemOn ? "All cameras are active and AI is monitoring the perimeter." : "Monitoring is paused. AI detections are currently disabled.";
+  const statusColor = systemOn ? "text-primary" : "text-destructive";
 
   return (
     <AppShell
@@ -193,7 +202,7 @@ function Dashboard() {
                   <div>
                     <h3 className="font-semibold text-sm">Recent Activity</h3>
                     <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-                      <strong className="text-foreground">{latestAlert.animal}</strong> was detected near the {latestAlert.side} fence {latestAlert.time}.
+                      {latestAlert.description} ({latestAlert.time})
                     </p>
                     <div className="mt-3 flex items-center gap-3">
                       <Button variant="outline" size="sm" className="h-8 text-xs rounded-full">View Recording</Button>
@@ -221,7 +230,6 @@ function Dashboard() {
                   </Button>
                 </div>
               </div>
-            </div>
           </PanelSection>
 
           <PanelSection
@@ -260,6 +268,7 @@ function Dashboard() {
               ))}
             </div>
           </PanelSection>
+          </div>
         </div>
 
         {/* Right Side: System Logs & Recent Alerts */}
@@ -278,9 +287,12 @@ function Dashboard() {
                     key={k}
                     className="flex items-center justify-between gap-3 pb-2 border-b border-border/40 last:pb-0 last:border-b-0"
                   >
-                    <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="text-xs font-medium">{label}</span>
-                  </Link>
+                    <span className="flex items-center gap-2">
+                      <Camera className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="text-xs font-medium">{k}</span>
+                    </span>
+                    <span className="text-xs">{v}</span>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -336,7 +348,6 @@ function Dashboard() {
                 <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                 <Tooltip
-                  contentStyle={tooltipStyle}
                   itemStyle={{ color: "var(--popover-foreground)" }}
                   labelStyle={{ color: "var(--popover-foreground)" }}
                 />
@@ -360,7 +371,6 @@ function Dashboard() {
                 <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={11} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                 <Tooltip
-                  contentStyle={tooltipStyle}
                   itemStyle={{ color: "var(--popover-foreground)" }}
                   labelStyle={{ color: "var(--popover-foreground)" }}
                 />
@@ -370,10 +380,6 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
         </PanelSection>
-
-          </div>
-        </div>
-
       </div>
     </AppShell>
   );
