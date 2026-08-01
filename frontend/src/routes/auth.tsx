@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppState } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,14 +31,15 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { login, authed, ready } = useAppState();
+  const { ready } = useAppState();
+  const { login, signup: signupAuth, isAuthed, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (ready && authed) {
+    if (ready && isAuthed) {
       navigate({ to: "/dashboard", replace: true });
     }
-  }, [ready, authed, navigate]);
+  }, [ready, isAuthed, navigate]);
 
   const [signup, setSignup] = useState({
     fullName: "",
@@ -45,10 +48,14 @@ function AuthPage() {
     village: "",
     district: "",
     state: "Gujarat",
-    farmName: "",
     farmSize: "",
     cropType: "",
+    password: "",
   });
+
+  const [email, setEmail] = useState("ramesh@agrishield.in");
+  const [password, setPassword] = useState("demo1234");
+  const [pending, setPending] = useState(false);
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
@@ -109,26 +116,44 @@ function AuthPage() {
             <TabsContent value="login" className="mt-5">
               <form
                 className="space-y-4"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  login();
-                  toast.success("Welcome back", { description: "Monitoring console unlocked." });
-                  navigate({ to: "/dashboard" });
+                  setPending(true);
+                  try {
+                    await login({ email, password });
+                    toast.success("Welcome back", { description: "Monitoring console unlocked." });
+                    navigate({ to: "/dashboard" });
+                  } catch (err: any) {
+                    toast.error("Login failed", { description: err.message || "Invalid credentials." });
+                  } finally {
+                    setPending(false);
+                  }
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="identifier">Mobile number or email</Label>
-                  <Input id="identifier" placeholder="98250 41122" defaultValue="98250 41122" />
+                  <Label htmlFor="identifier">Email</Label>
+                  <Input 
+                    id="identifier" 
+                    placeholder="ramesh@agrishield.in" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)} 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" defaultValue="demo1234" />
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)} 
+                  />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={pending}>
+                  {pending && <Loader2 className="mr-2 size-4 animate-spin" />}
                   Enter monitoring console
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Demo build — any credentials open the dashboard.
+                  Use your registered backend credentials.
                 </p>
               </form>
             </TabsContent>
@@ -136,17 +161,28 @@ function AuthPage() {
             <TabsContent value="signup" className="mt-5">
               <form
                 className="space-y-3"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  login(
-                    Object.fromEntries(
-                      Object.entries(signup).filter(([, v]) => v.trim().length > 0),
-                    ),
-                  );
-                  toast.success("Farm registered", {
-                    description: "AgriShield monitoring is now active for your farm.",
-                  });
-                  navigate({ to: "/dashboard" });
+                  setPending(true);
+                  try {
+                    // Extract firstName and lastName from fullName for the backend DTO
+                    const names = signup.fullName.split(" ");
+                    const firstName = names[0] || "Farmer";
+                    const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+                    
+                    await signupAuth({
+                      email: signup.email,
+                      password: signup.password,
+                      firstName,
+                      lastName,
+                    });
+                    toast.success("Account created", { description: "Monitoring console unlocked." });
+                    navigate({ to: "/dashboard" });
+                  } catch (err: any) {
+                    toast.error("Signup failed", { description: err.message || "Could not create account." });
+                  } finally {
+                    setPending(false);
+                  }
                 }}
               >
                 <div className="grid gap-3 sm:grid-cols-2">

@@ -25,12 +25,10 @@ import {
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, RiskPill } from "@/components/shield-ui";
 import { Button } from "@/components/ui/button";
-import {
-  ANIMALS,
-  DAILY_TREND,
-  RECENT_ALERTS,
-} from "@/lib/agrishield-data";
+import { Progress } from "@/components/ui/progress";
 import { useAppState } from "@/lib/app-state";
+import { useDashboard } from "@/hooks/useDashboard";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -54,18 +52,32 @@ const QUICK_ACTIONS = [
 
 function Dashboard() {
   const { systemOn, profile } = useAppState();
-  const todayTotal = ANIMALS.reduce((s, a) => s + a.today, 0);
+  const { data, isLoading } = useDashboard();
 
-  // Hero Status Logic
-  const statusColor = systemOn ? "text-primary" : "text-destructive";
-  const statusBg = systemOn ? "bg-primary/10" : "bg-destructive/10";
-  const statusIcon = systemOn ? <ShieldCheck className="size-6 text-primary" /> : <AlertTriangle className="size-6 text-destructive" />;
-  const statusTitle = systemOn ? "Safe & Secure" : "Monitoring Paused";
-  const statusDesc = systemOn 
-    ? `No animal activity detected in the last 4 hours. Your farm in ${profile.village} is secure.`
-    : "The security system is currently disabled. Enable it to resume crop protection.";
+  if (isLoading || !data) {
+    return (
+      <AppShell title={`${profile.farmName}`} subtitle="Loading dashboard...">
+        <div className="grid min-h-[60vh] place-items-center">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppShell>
+    );
+  }
 
-  const latestAlert = RECENT_ALERTS[0];
+  const todayTotal = data.distribution.reduce((s, a) => s + a.value, 0); // Approx
+  const weekTotal = data.distribution.reduce((s, a) => s + a.value, 0) * 4; // Approx
+  const distribution = data.distribution;
+  const DAILY_TREND = data.dailyTrend;
+  const WEEKLY_ACTIVITY = data.weeklyActivity;
+  const MONTHLY_ACTIVITY = data.monthlyActivity;
+  const RECENT_ALERTS = data.recentAlerts;
+  // Fallback for UI preservation if peakHours isn't fully mocked yet
+  const PEAK_HOURS = [
+    { hour: "04", count: 6 },
+    { hour: "06", count: 11 },
+    { hour: "18", count: 17 },
+    { hour: "20", count: 26 },
+  ];
 
   return (
     <AppShell
@@ -209,23 +221,155 @@ function Dashboard() {
                   </Button>
                 </div>
               </div>
-            </PanelSection>
+            </div>
+          </PanelSection>
 
-            {/* Quick Actions Grid */}
-            <PanelSection title="Quick Links">
-              <div className="grid grid-cols-2 gap-3">
-                {QUICK_ACTIONS.slice(0, 4).map(({ to, label, icon: Icon }) => (
-                  <Link 
-                    key={to} 
-                    to={to}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors group"
+          <PanelSection
+            title="Detection overview"
+            description="Today and weekly counts per agricultural species"
+          >
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {distribution.map((a) => (
+                <div
+                  key={a.name}
+                  className="rounded-xl border border-border bg-surface/60 p-3.5 transition-all hover:border-primary/40 hover:bg-surface/80"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 font-medium text-sm">
+                      {a.name}
+                    </span>
+                    <RiskPill level="medium" />
+                  </div>
+                  <div className="mt-3.5 flex items-end gap-5">
+                    <span>
+                      <span className="block font-display text-xl font-bold">{Math.floor(a.value / 4)}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        today
+                      </span>
+                    </span>
+                    <span>
+                      <span className="block font-display text-xl font-bold text-muted-foreground">
+                        {a.value}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        this week
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </PanelSection>
+        </div>
+
+        {/* Right Side: System Logs & Recent Alerts */}
+        <div className="flex flex-col gap-6">
+          <PanelSection title="Edge Hardware Health" description="Integrated IoT protection stats">
+            <div className="relative overflow-hidden rounded-xl border border-border bg-background/55 p-4">
+              <ul className="relative space-y-3.5 text-xs">
+                {[
+                  ["System status", systemOn ? "🟢 Active & Guarding" : "🔴 Paused / Disabled"],
+                  ["Camera connection", "Connected · CAM-01 North"],
+                  ["Local detection engine", systemOn ? "Running · 24 fps" : "Idle (Switch off)"],
+                  ["Active deterrent hardware", systemOn ? "Ready · Strobe Horn Node" : "Disabled"],
+                  ["Last sync time", "2 seconds ago"],
+                ].map(([k, v]) => (
+                  <li
+                    key={k}
+                    className="flex items-center justify-between gap-3 pb-2 border-b border-border/40 last:pb-0 last:border-b-0"
                   >
                     <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     <span className="text-xs font-medium">{label}</span>
                   </Link>
                 ))}
-              </div>
-            </PanelSection>
+              </ul>
+            </div>
+          </PanelSection>
+
+          <PanelSection
+            title="Recent alerts"
+            description="Latest five detections across Gujarat zones"
+            right={
+              <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+                <Link to="/history">View all</Link>
+              </Button>
+            }
+          >
+            <ul className="divide-y divide-border">
+              {RECENT_ALERTS.map((d: any) => (
+                <li key={d.id} className="flex items-center justify-between gap-3 py-3 text-xs">
+                  <span className="min-w-0">
+                    <span className="block truncate font-semibold text-foreground">{d.description || d.message || d.animal}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {d.time || d.timestamp}
+                    </span>
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={
+                      d.level === "Critical" || d.alert === "Triggered"
+                        ? "border-destructive/40 bg-destructive/10 text-destructive text-[10px] font-bold"
+                        : "border-border text-muted-foreground text-[10px]"
+                    }
+                  >
+                    {d.level || d.alert}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </PanelSection>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <PanelSection title="Daily detection trend" description="Intrusions per day this week">
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={DAILY_TREND}>
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  itemStyle={{ color: "var(--popover-foreground)" }}
+                  labelStyle={{ color: "var(--popover-foreground)" }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="intrusions"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2}
+                  fill="url(#g1)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </PanelSection>
+
+        <PanelSection title="Weekly activity" description="Intrusions vs successfully deterred">
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={WEEKLY_ACTIVITY}>
+                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={11} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  itemStyle={{ color: "var(--popover-foreground)" }}
+                  labelStyle={{ color: "var(--popover-foreground)" }}
+                />
+                <Bar dataKey="intrusions" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="deterred" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </PanelSection>
 
           </div>
         </div>
