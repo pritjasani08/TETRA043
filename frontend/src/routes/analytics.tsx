@@ -23,7 +23,8 @@ import {
   DETECTIONS,
   REGIONS,
 } from "@/lib/agrishield-data";
-import { Activity, ShieldCheck, AlertTriangle, MapPin } from "lucide-react";
+import { Activity, ShieldCheck, AlertTriangle, MapPin, Loader2 } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
