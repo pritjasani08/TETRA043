@@ -19,7 +19,6 @@ import {
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, StatCard } from "@/components/shield-ui";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { Loader2 } from "lucide-react";
 import {
   ANIMALS,
   DETECTIONS,

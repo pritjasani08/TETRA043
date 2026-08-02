@@ -370,7 +370,7 @@ function Dashboard() {
                      ))}
                   </div>
                 </div>
-              </div>
+
             </PanelSection>
 
             {/* Recommendations / Assistant */}
@@ -427,23 +427,7 @@ function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-3.5 flex items-end gap-5">
-                    <span>
-                      <span className="block font-display text-xl font-bold">{Math.floor(a.value / 4)}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        today
-                      </span>
-                    </span>
-                    <span>
-                      <span className="block font-display text-xl font-bold text-muted-foreground">
-                        {a.value}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        this week
-                      </span>
-                    </span>
-                  </div>
-                </div>
+
               ))}
             </div>
           </PanelSection>
