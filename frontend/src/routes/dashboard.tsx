@@ -278,7 +278,7 @@ function Dashboard() {
                         <strong className="text-foreground font-bold">{latestAlert.animal}</strong>{" "}
                         was safely deterred near the{" "}
                         <strong className="text-foreground font-bold">
-                          {latestAlert.side} fence
+                          {latestAlert.side}
                         </strong>{" "}
                         at {latestAlert.time}.
                       </p>
@@ -342,55 +342,41 @@ function Dashboard() {
 
             {/* Elegant Distribution Donut */}
             <PanelSection title="Animal Distribution">
-              <div className="flex items-center gap-6 mt-2">
-                <div className="h-32 w-32 shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={distribution}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={36}
-                        outerRadius={52}
-                        paddingAngle={6}
-                        cornerRadius={8}
-                        stroke="none"
-                      >
-                        {distribution.map((_: any, i: number) => (
-                          <Cell
-                            key={i}
-                            fill={
-                              i === 0
-                                ? "var(--warning)"
-                                : i === 1
-                                  ? "var(--primary)"
-                                  : "var(--accent)"
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "none",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Recent Activity</h3>
-                  <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-                    {latestAlert.description} ({latestAlert.time})
-                  </p>
-                  <div className="mt-3 flex items-center gap-3">
-                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-full">
-                      View Recording
-                    </Button>
+<div className="flex items-center gap-6 mt-2">
+                  <div className="h-32 w-32 shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={distribution}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={36}
+                          outerRadius={52}
+                          paddingAngle={6}
+                          cornerRadius={8}
+                          stroke="none"
+                        >
+                          {distribution.map((_, i) => (
+                            <Cell key={i} fill={i === 0 ? "var(--warning)" : i === 1 ? "var(--primary)" : "var(--accent)"} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex flex-col gap-3 flex-1">
+                     {distribution.slice(0,3).map((d, i) => (
+                        <div key={d.name} className="flex justify-between items-center text-sm font-medium">
+                           <div className="flex items-center gap-2">
+                              <span className="size-3 rounded-full" style={{ backgroundColor: i === 0 ? "var(--warning)" : i === 1 ? "var(--primary)" : "var(--accent)" }} />
+                              <span className="text-foreground">{d.name}</span>
+                           </div>
+                           <span className="text-muted-foreground font-bold">{d.value}</span>
+                        </div>
+                     ))}
                   </div>
                 </div>
-              </div>
+
             </PanelSection>
 
             {/* Recommendations / Assistant */}
@@ -447,10 +433,17 @@ function Dashboard() {
                       </span>
                     </div>
                   </div>
+<<<<<<< HEAD
+
+              ))}
+            </div>
+          </PanelSection>
+=======
                 ))}
               </div>
             </PanelSection>
           </div>
+>>>>>>> origin/main
         </div>
 
         {/* Right Side: System Logs & Recent Alerts */}
@@ -564,6 +557,7 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
         </PanelSection>
+      </div>
       </div>
     </AppShell>
   );

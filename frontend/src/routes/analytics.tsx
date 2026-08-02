@@ -18,6 +18,7 @@ import {
 
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, StatCard } from "@/components/shield-ui";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import {
   ANIMALS,
   DETECTIONS,
@@ -177,7 +178,7 @@ function AnalyticsPage() {
                     cornerRadius={8}
                     stroke="none"
                   >
-                    {distribution.map((_, i) => (
+                    {distribution.map((_: any, i: number) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>

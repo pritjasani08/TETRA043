@@ -152,6 +152,7 @@
     box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.05), 0 2px 5px rgba(0,0,0,0.02);
   }
 }
+
 @utility text-gradient {
   background: linear-gradient(92deg, var(--primary), var(--warning));
   -webkit-background-clip: text;
