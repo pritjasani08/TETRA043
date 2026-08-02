@@ -111,21 +111,19 @@ export const DETECTIONS: Detection[] = Array.from({ length: 64 }, (_, i) => {
   const hour = 5 + Math.floor(Math.abs(seeded(i + 40)) * 19);
   const minute = Math.floor(Math.abs(seeded(i + 60)) * 60);
   const d = new Date(2026, 6, 31 - dayOffset);
-  
+
   const timeStr = `${((hour + 11) % 12) + 1}:${minute.toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
   const timeStr2 = `${((hour + 11) % 12) + 1}:${(minute + 1).toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
   const timeStr3 = `${((hour + 11) % 12) + 1}:${(minute + 2).toString().padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
-  
+
   const side = sides[Math.floor(Math.abs(seeded(i + 100)) * sides.length)]!;
   const confidence = Math.round(78 + Math.abs(seeded(i + 80)) * 21);
   const triggered = Math.abs(seeded(i + 120)) > 0.12;
-  
+
   const status = possibleStatuses[Math.floor(Math.abs(seeded(i + 130)) * possibleStatuses.length)]!;
-  
-  const actions = triggered 
-    ? animal.deterrents.map(d => `${d} Activated`)
-    : ["Farmer Notified"];
-    
+
+  const actions = triggered ? animal.deterrents.map((d) => `${d} Activated`) : ["Farmer Notified"];
+
   if (triggered && Math.abs(seeded(i + 140)) > 0.5) {
     actions.push("Farmer Notified");
   }
@@ -137,8 +135,10 @@ export const DETECTIONS: Detection[] = Array.from({ length: 64 }, (_, i) => {
   const timeline = [
     { time: timeStr, action: "Animal detected" },
     ...(triggered ? [{ time: timeStr, action: `${animal.deterrents[0]} activated` }] : []),
-    ...(triggered && animal.deterrents[1] ? [{ time: timeStr2, action: `${animal.deterrents[1]} activated` }] : []),
-    { time: timeStr3, action: triggered ? "Animal exited" : "Monitoring continued" }
+    ...(triggered && animal.deterrents[1]
+      ? [{ time: timeStr2, action: `${animal.deterrents[1]} activated` }]
+      : []),
+    { time: timeStr3, action: triggered ? "Animal exited" : "Monitoring continued" },
   ];
 
   return {

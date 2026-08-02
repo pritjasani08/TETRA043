@@ -31,12 +31,7 @@ export class DetectionService {
 
     const formData = new FormData();
     formData.append("image", file);
-    const data = await ApiClient.post<any>("/detections/analyze", formData, {
-      // Remove Content-Type so the browser sets multipart/form-data with boundary
-      headers: {
-        "Content-Type": undefined as any,
-      },
-    });
+    const data = await ApiClient.post<any>("/detections/analyze", formData);
 
     // Map backend response
     return {

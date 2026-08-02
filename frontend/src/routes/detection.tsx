@@ -1,8 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  BellRing, FileVideo, ImageUp, Loader2, Radar, Volume2, Zap, Play, UploadCloud,
-  AlertTriangle, Camera, ShieldCheck, Download, Printer, Share2, MoreVertical,
-  CheckCircle2, Clock, MapPin, Activity, Radio, VolumeX, Pause, RefreshCw, Send, Focus, ArrowRight, Map
+  BellRing,
+  FileVideo,
+  ImageUp,
+  Loader2,
+  Radar,
+  Volume2,
+  Zap,
+  Play,
+  UploadCloud,
+  AlertTriangle,
+  Camera,
+  ShieldCheck,
+  Download,
+  Printer,
+  Share2,
+  MoreVertical,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Activity,
+  Radio,
+  VolumeX,
+  Pause,
+  RefreshCw,
+  Send,
+  Focus,
+  ArrowRight,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -122,25 +146,10 @@ function DetectionPage() {
     setTimelineStep(0);
     setRunning(true);
 
-    const formData = new FormData();
-    if (kind === "video") {
-      formData.append("video", file);
-    } else {
-      formData.append("image", file);
-    }
-
-    const endpoint = kind === "video" ? "http://localhost:8000/predict_video" : "http://localhost:8000/predict";
+    const { DetectionService } = await import("../services/detection.service");
 
     // Start API request and animation simultaneously
-    const analyzePromise = fetch(endpoint, {
-      method: "POST",
-      body: formData
-    })
-    .then(async res => {
-      if (!res.ok) throw new Error("Server error");
-      return await res.json();
-    })
-    .catch((err) => {
+    const analyzePromise = DetectionService.analyze(file).catch((err) => {
       console.error(err);
       return null;
     });
@@ -153,48 +162,42 @@ function DetectionPage() {
       } else {
         window.clearInterval(timer);
 
-        // Wait for API to finish if it hasn"t already
+        // Wait for API to finish if it hasn't already
         const data = await analyzePromise;
         setRunning(false);
 
-        if (data) {
-          if (!data.detected) {
-            toast.info(data.message || "No animal detected");
-            return;
-          }
-          
-          const now = new Date();
+        if (data && data.detection) {
+          const { detection, boundingBox } = data;
           setResult({
-            animal: data.animal,
-            confidence: data.confidence,
-            side: SIDES[Math.floor(Math.random() * SIDES.length)] || "Unknown",
-            time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-            box: { x: -100, y: -100, w: 0, h: 0 }, // Hide the CSS box since Python draws it
-            media: kind === "video" ? data.video_url : data.image_base64,
+            animal: detection.animal,
+            confidence: detection.confidence,
+            side: detection.side,
+            time: detection.time,
+            box: boundingBox,
+            media: url,
             kind,
-            distance: Math.round(5 + Math.random() * 25),
-            direction: Math.random() > 0.5 ? "Inbound" : "Parallel",
-            speed: Number((1 + Math.random() * 5).toFixed(1)),
-            threatLevel: "High",
-            cameraId: "CAM-0" + Math.ceil(Math.random() * 8),
-            weather: "Clear / 24°C",
-            speciesType: "Mammal"
+            distance: detection.distance || Math.round(5 + Math.random() * 25),
+            direction: detection.direction || "Inbound",
+            speed: detection.speed || 3.5,
+            threatLevel: detection.threatLevel || "High",
+            cameraId: detection.cameraId || "CAM-01",
+            weather: detection.weather || "Clear / 24°C",
+            speciesType: detection.speciesType || "Mammal",
           });
 
           if (systemOn) {
-            toast.error(`${data.animal} detected`, {
-              description: `${data.confidence}% confidence`,
+            toast.error(`${detection.animal} detected`, {
+              description: `${detection.side} · ${detection.confidence}% confidence`,
               icon: <BellRing className="size-5" />,
             });
           }
         } else {
           toast.error("Detection Failed", {
-            description: "Failed to connect to AI server. Please make sure uvicorn is running.",
+            description: "Could not process image from the server.",
           });
         }
       }
-    }, 600);
-
+    }, 800);
   };
 
   const handleAction = (id: string) => {
@@ -616,15 +619,6 @@ function DetectionPage() {
                           Village
                         </Button>
                       </div>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button variant="default" className="w-full justify-center rounded-xl font-bold bg-primary text-white hover:bg-primary/90 h-12 transition-all shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500" asChild>
-                        <Link to="/heatmap" search={{ intrusion: result.side }}>
-                           <Map className="mr-2 size-4" />
-                           View Heat Map
-                        </Link>
-                      </Button>
                     </div>
                   </div>
                 ) : (
