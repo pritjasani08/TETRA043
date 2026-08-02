@@ -1,7 +1,11 @@
 import { AuthStorage } from './AuthStorage';
 import { ANIMALS, DAILY_TREND, WEEKLY_ACTIVITY, MONTHLY_ACTIVITY, RECENT_ALERTS, PEAK_HOURS } from './agrishield-data';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+let envApiUrl = import.meta.env['VITE_API_URL'];
+if (envApiUrl && envApiUrl.includes('localhost') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  envApiUrl = undefined; // Force dynamic fallback on mobile
+}
+const BASE_URL = envApiUrl || `http://${window.location.hostname}:5000/api`;
 
 export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -22,49 +26,31 @@ export class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error('API request failed');
+        let errorMessage = 'API request failed';
+        try {
+          const errData = await response.json();
+          if (errData && errData.message) {
+            errorMessage = errData.message;
+          }
+        } catch (e) {
+          // ignore JSON parse error on failed request
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
-      return data.data;
+      return data.data !== undefined ? data.data : data;
     } catch (err) {
       console.warn(`[ApiClient] Failed to fetch ${endpoint}, falling back to mock data.`);
       
-      // MOCK DATA FALLBACK ROUTING
-      if (endpoint.includes('/dashboard/summary')) {
-        return {
-          systemStatus: { state: "Secured", cameraStatus: "All Systems Normal", lastUpdated: "Just now" },
-          metrics: [],
-          charts: {
-            dailyTrend: { labels: DAILY_TREND.map(d => d.day), series: DAILY_TREND.map(d => d.intrusions) },
-            weeklyTrend: { labels: WEEKLY_ACTIVITY.map(d => d.week), series: WEEKLY_ACTIVITY.map(d => d.intrusions) },
-            monthlyTrend: { labels: MONTHLY_ACTIVITY.map(d => d.month), series: MONTHLY_ACTIVITY.map(d => d.intrusions) },
-            animalDistribution: ANIMALS.map(a => ({ species: a.name, value: a.today }))
-          },
-          peakDetectionHours: "2 AM - 4 AM",
-          recentAlerts: RECENT_ALERTS.map(a => ({ id: a.id, time: a.time, description: `Detected ${a.animal}`, level: "Warning" })),
-          quickActions: []
-        } as any;
+      // If auth route fails, throw immediately so UI shows error instead of mocking
+      if (endpoint.includes('/auth/')) {
+        throw err;
       }
+
+
       
-      if (endpoint.includes('/analytics/summary')) {
-        return {
-          dailyTrend: { labels: DAILY_TREND.map(d => d.day), series: DAILY_TREND.map(d => d.intrusions) },
-          weeklyTrend: { labels: WEEKLY_ACTIVITY.map(d => d.week), series: WEEKLY_ACTIVITY.map(d => d.intrusions) },
-          monthlyTrend: { labels: MONTHLY_ACTIVITY.map(d => d.month), series: MONTHLY_ACTIVITY.map(d => d.intrusions) },
-          animalDistribution: ANIMALS.map(a => ({ label: a.name, value: a.today })),
-          confidenceDistribution: [
-            { bracket: "90-100%", count: 145 },
-            { bracket: "80-89%", count: 89 },
-            { bracket: "70-79%", count: 34 }
-          ],
-          peakDetectionHours: [
-            { hourRange: "02:00-03:00", intensity: "High" },
-            { hourRange: "03:00-04:00", intensity: "High" },
-            { hourRange: "19:00-20:00", intensity: "Medium" }
-          ]
-        } as any;
-      }
+
 
       if (endpoint.includes('/auth/me')) {
         return { id: "test-user", name: "Guest User" } as any;
@@ -89,6 +75,13 @@ export class ApiClient {
   static async post<T>(endpoint: string, body: any): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'POST',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    });
+  }
+
+  static async put<T>(endpoint: string, body: any): Promise<T> {
+    return this.fetch<T>(endpoint, {
+      method: 'PUT',
       body: body instanceof FormData ? body : JSON.stringify(body),
     });
   }

@@ -11,10 +11,16 @@ interface MapContextType {
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
+export function useMapContext() {
+  const context = useContext(MapContext);
+  if (!context) throw new Error("useMapContext must be used within a Map");
+  return context;
+}
+
 // Dynamically inject Leaflet CSS & JS from CDN
 function loadLeaflet(): Promise<any> {
   return new Promise((resolve, reject) => {
-    if ((window as any).L) {
+    if ((window as any).L && (window as any).L.heatLayer) {
       resolve((window as any).L);
       return;
     }
@@ -28,7 +34,14 @@ function loadLeaflet(): Promise<any> {
     // Insert JS script
     const script = document.createElement("script");
     script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.onload = () => resolve((window as any).L);
+    script.onload = () => {
+      // Once Leaflet is loaded, load Leaflet.heat
+      const heatScript = document.createElement("script");
+      heatScript.src = "https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js";
+      heatScript.onload = () => resolve((window as any).L);
+      heatScript.onerror = reject;
+      document.head.appendChild(heatScript);
+    };
     script.onerror = reject;
     document.head.appendChild(script);
   });
@@ -72,23 +85,27 @@ export function Map({
   zoom?: number;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
   const [leaflet, setLeaflet] = useState<{ L: any; map: any } | null>(null);
   const [activeMarker, setActiveMarker] = useState<string | number | null>(null);
 
   // Load CDN scripts and configure map instance
   useEffect(() => {
-    let mapInstance: any = null;
+    if (mapInstanceRef.current) return; // Prevent double initialization
+
     loadLeaflet().then((L) => {
       if (!mapRef.current) return;
 
       // Note: Leaflet expects [Lat, Lng] coordinates
-      mapInstance = L.map(mapRef.current, {
+      const mapInstance = L.map(mapRef.current, {
         zoomControl: false,
         attributionControl: false,
       }).setView([center[1], center[0]], zoom);
 
-      // Load premium dark-theme tile layers from CartoDB (based on OpenStreetMap data)
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      mapInstanceRef.current = mapInstance;
+
+      // Load light-theme tile layers from CartoDB (based on OpenStreetMap data)
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 20,
       }).addTo(mapInstance);
 
@@ -96,11 +113,19 @@ export function Map({
     });
 
     return () => {
-      if (mapInstance) {
-        mapInstance.remove();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, []); // Intentionally only run on mount
+
+  // React to center/zoom changes
+  useEffect(() => {
+    if (mapInstanceRef.current && center) {
+      mapInstanceRef.current.setView([center[1], center[0]], zoom);
+    }
+  }, [center, zoom]);
 
   return (
     <MapContext.Provider
@@ -112,7 +137,7 @@ export function Map({
       }}
     >
       <style dangerouslySetInnerHTML={{ __html: leafletStyleOverrides }} />
-      <div className="relative w-full h-full rounded-xl border border-white/10 overflow-hidden bg-[#090b11] min-h-[500px]">
+      <div className="relative w-full h-full rounded-xl border border-border overflow-hidden bg-slate-50 min-h-[500px]">
         <div ref={mapRef} className="w-full h-full z-0 cursor-grab active:cursor-grabbing" />
 
         {/* Mount children once Leaflet is initialized */}
@@ -237,9 +262,11 @@ export function MarkerContent({ children }: { children: React.ReactNode }) {
 export function MarkerLabel({
   children,
   position = "bottom",
+  className = "",
 }: {
   children: React.ReactNode;
   position?: "top" | "bottom" | "left" | "right";
+  className?: string;
 }) {
   const posClasses = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2.5",
@@ -250,7 +277,7 @@ export function MarkerLabel({
 
   return (
     <span
-      className={`absolute whitespace-nowrap text-[10px] font-mono font-bold tracking-wider text-emerald-400 bg-[#070913]/90 border border-white/10 px-2 py-0.5 rounded shadow-lg pointer-events-none ${posClasses[position]}`}
+      className={`absolute whitespace-nowrap text-[10px] font-mono font-bold tracking-wider text-emerald-400 bg-[#070913]/90 border border-white/10 px-2 py-0.5 rounded shadow-lg pointer-events-none ${posClasses[position]} ${className}`}
     >
       {children}
     </span>
@@ -285,4 +312,92 @@ export function MarkerPopup({
       {children}
     </div>
   );
+}
+
+export function MapPolygon({
+  positions,
+  color = "#A3E635",
+  fillOpacity = 0.2,
+  weight = 3,
+  className,
+}: {
+  positions: [number, number][]; // Array of [Lat, Lng]
+  color?: string;
+  fillOpacity?: number;
+  weight?: number;
+  className?: string;
+}) {
+  const { L, map } = useMapContext();
+  const polygonRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!map || !L) return;
+
+    // Remove existing polygon if any
+    if (polygonRef.current) {
+      map.removeLayer(polygonRef.current);
+    }
+
+    if (positions.length > 0) {
+      polygonRef.current = L.polygon(positions, {
+        color,
+        fillOpacity,
+        weight,
+        dashArray: "5, 10", // slightly dashed line for boundary look
+        lineCap: "round",
+        lineJoin: "round",
+        className,
+      }).addTo(map);
+    }
+
+    return () => {
+      if (polygonRef.current && map) {
+        map.removeLayer(polygonRef.current);
+      }
+    };
+  }, [map, L, positions, color, fillOpacity, weight]);
+
+  return null;
+}
+
+export function MapHeatmapLayer({
+  points,
+  radius = 25,
+  blur = 15,
+  maxZoom = 17,
+  gradient = { 0.4: 'lime', 0.6: 'yellow', 1.0: 'red' }
+}: {
+  points: [number, number, number][]; // [lat, lng, intensity]
+  radius?: number;
+  blur?: number;
+  maxZoom?: number;
+  gradient?: Record<number, string>;
+}) {
+  const { L, map } = useMapContext();
+  const heatLayerRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!map || !L || !L.heatLayer) return;
+
+    if (heatLayerRef.current) {
+      map.removeLayer(heatLayerRef.current);
+    }
+
+    if (points.length > 0) {
+      heatLayerRef.current = L.heatLayer(points, {
+        radius,
+        blur,
+        maxZoom,
+        gradient
+      }).addTo(map);
+    }
+
+    return () => {
+      if (heatLayerRef.current && map) {
+        map.removeLayer(heatLayerRef.current);
+      }
+    };
+  }, [map, L, points, radius, blur, maxZoom, gradient]);
+
+  return null;
 }

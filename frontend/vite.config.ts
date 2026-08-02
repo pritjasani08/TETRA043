@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import fs from "fs";
 import path from "path";
@@ -60,5 +59,17 @@ try {
 }
 
 export default defineConfig({
-  plugins: [tanstackStart(), react(), tailwindcss(), tsconfigPaths()],
+  plugins: [tanstackStart(), react(), tailwindcss()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  server: {
+    host: true, // Listen on all network interfaces
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      }
+    }
+  }
 });

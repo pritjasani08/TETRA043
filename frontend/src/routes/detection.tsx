@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BellRing, FileVideo, ImageUp, Loader2, Radar, Volume2, Zap, Play, UploadCloud,
   AlertTriangle, Camera, ShieldCheck, Download, Printer, Share2, MoreVertical,
-  CheckCircle2, Clock, MapPin, Activity, Radio, VolumeX, Pause, RefreshCw, Send, Focus, ArrowRight
+  CheckCircle2, Clock, MapPin, Activity, Radio, VolumeX, Pause, RefreshCw, Send, Focus, ArrowRight, Map as MapIcon
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { VOICE_LINES, ANIMALS } from "@/lib/agrishield-data";
 import { speakAlert, useAppState } from "@/lib/app-state";
+import { ApiClient } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/detection")({
@@ -44,13 +45,7 @@ type Result = {
   box: { x: number; y: number; w: number; h: number };
   media: string | null;
   kind: "image" | "video";
-  distance: number;
-  direction: string;
-  speed: number;
   threatLevel: "High" | "Medium" | "Low";
-  cameraId: string;
-  weather: string;
-  speciesType: string;
 };
 
 const SIDES = ["North Fence", "East Gate", "South Canal", "West Boundary"];
@@ -87,6 +82,11 @@ function DetectionPage() {
   const runDetection = async (kind: "image" | "video", file?: File) => {
     if (!file) return;
     
+    if (!systemOn) {
+      toast.error("System Offline", { description: "Turn on System Control to run detections." });
+      return;
+    }
+    
     setResult(null);
     setTimelineStep(0);
     setRunning(true);
@@ -101,7 +101,7 @@ function DetectionPage() {
       
       setTimelineStep(1); // Preprocess
       
-      const endpoint = kind === "video" ? 'http://localhost:8000/predict_video' : 'http://localhost:8000/predict';
+      const endpoint = kind === "video" ? `http://${window.location.hostname}:8000/predict_video` : `http://${window.location.hostname}:8000/predict`;
       
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -132,14 +132,18 @@ function DetectionPage() {
         box: { x: -100, y: -100, w: 0, h: 0 }, // Hide the CSS box since Python draws it
         media: kind === "video" ? data.video_url : data.image_base64,
         kind,
-        distance: Math.round(5 + Math.random() * 25),
-        direction: Math.random() > 0.5 ? "Inbound" : "Parallel",
-        speed: Number((1 + Math.random() * 5).toFixed(1)),
         threatLevel: "High",
-        cameraId: "CAM-0" + Math.ceil(Math.random() * 8),
-        weather: "Clear / 24°C",
-        speciesType: "Mammal"
       });
+      
+      // SAVE TO DATABASE
+      ApiClient.post('/detection/save', {
+        animal: data.animal,
+        confidence: data.confidence / 100, // Database expects decimal if we display * 100
+        media_url: kind === "video" ? data.video_url : data.image_base64,
+        media_type: kind,
+        threat_level: "High",
+        side: SIDES[Math.floor(Math.random() * SIDES.length)]
+      }).catch(e => console.warn("Failed to save detection to history DB:", e));
       
       setRunning(false);
       if (systemOn) {
@@ -147,6 +151,13 @@ function DetectionPage() {
           description: `${data.confidence}% confidence`,
           icon: <BellRing className="size-5" />,
         });
+        
+        // Trigger hardware alert on the connected device!
+        ApiClient.post('/alerts/trigger', {
+          animal: data.animal,
+          camera: "CAM-01",
+          threatLevel: "High"
+        }).catch(e => console.warn("Could not trigger hardware alert:", e));
       }
     } catch(err) {
       toast.error("Failed to connect to AI server. Please make sure uvicorn is running.");
@@ -199,34 +210,62 @@ function DetectionPage() {
                   </TabsList>
 
                   <TabsContent value="image" className="mt-4 m-0 p-0">
-                    <input ref={imageInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) runDetection("image", f); }} />
-                    <UploadDrop icon={<ImageUp className="size-6" />} label="Upload Image" hint="Drag & drop a photo (JPG/PNG)" onClick={() => imageInput.current?.click()} />
+                    {!systemOn ? (
+                      <div className="flex w-full h-[120px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/50 text-muted-foreground opacity-70">
+                        <Activity className="size-6 mb-2 opacity-50" />
+                        <p className="text-sm font-bold">System is Offline</p>
+                        <p className="text-xs">Enable System Control in the sidebar</p>
+                      </div>
+                    ) : (
+                      <>
+                        <input ref={imageInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) runDetection("image", f); }} />
+                        <UploadDrop icon={<ImageUp className="size-6" />} label="Upload Image" hint="Drag & drop a photo (JPG/PNG)" onClick={() => imageInput.current?.click()} />
+                      </>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="video" className="mt-4 m-0 p-0">
-                    <input ref={videoInput} type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) runDetection("video", f); }} />
-                    <UploadDrop icon={<FileVideo className="size-6" />} label="Upload Video" hint="Drag & drop a clip (MP4)" onClick={() => videoInput.current?.click()} />
+                    {!systemOn ? (
+                      <div className="flex w-full h-[120px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/50 text-muted-foreground opacity-70">
+                        <Activity className="size-6 mb-2 opacity-50" />
+                        <p className="text-sm font-bold">System is Offline</p>
+                        <p className="text-xs">Enable System Control in the sidebar</p>
+                      </div>
+                    ) : (
+                      <>
+                        <input ref={videoInput} type="file" accept="video/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) runDetection("video", f); }} />
+                        <UploadDrop icon={<FileVideo className="size-6" />} label="Upload Video" hint="Drag & drop a clip (MP4)" onClick={() => videoInput.current?.click()} />
+                      </>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="live" className="mt-4 m-0 p-0">
-                    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface to-background p-6 flex flex-col items-center text-center shadow-inner h-[120px] justify-center">
-                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
-                      <div className="relative z-10 flex items-center justify-between w-full max-w-lg mx-auto">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 bg-white rounded-full shadow-md border border-primary/10">
-                            <Radar className="size-6 text-primary animate-pulse" />
-                          </div>
-                          <div className="text-left">
-                            <h3 className="font-display text-base font-bold text-foreground">Edge Camera Feed</h3>
-                            <p className="text-xs text-muted-foreground font-medium">Real-time simulation</p>
-                          </div>
-                        </div>
-                        <Button onClick={() => runDetection("video", new File([""], "dummy.mp4"))} disabled={running} className="rounded-xl px-6 shadow-md shadow-primary/20 h-10 font-bold">
-                          {running ? <Loader2 className="size-4 animate-spin mr-2" /> : <Play className="size-4 mr-2" />}
-                          {running ? "Processing..." : "Start Feed"}
-                        </Button>
+                    {!systemOn ? (
+                      <div className="flex w-full h-[120px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface/50 text-muted-foreground opacity-70">
+                        <Activity className="size-6 mb-2 opacity-50" />
+                        <p className="text-sm font-bold">System is Offline</p>
+                        <p className="text-xs">Enable System Control in the sidebar</p>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface to-background p-6 flex flex-col items-center text-center shadow-inner h-[120px] justify-center">
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
+                        <div className="relative z-10 flex items-center justify-between w-full max-w-lg mx-auto">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white rounded-full shadow-md border border-primary/10">
+                              <Radar className="size-6 text-primary animate-pulse" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="font-display text-base font-bold text-foreground">Edge Camera Feed</h3>
+                              <p className="text-xs text-muted-foreground font-medium">Real-time simulation</p>
+                            </div>
+                          </div>
+                          <Button onClick={() => runDetection("video", new File([""], "dummy.mp4"))} disabled={running} className="rounded-xl px-6 shadow-md shadow-primary/20 h-10 font-bold">
+                            {running ? <Loader2 className="size-4 animate-spin mr-2" /> : <Play className="size-4 mr-2" />}
+                            {running ? "Processing..." : "Start Feed"}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
 
@@ -359,6 +398,13 @@ function DetectionPage() {
                       <p className="text-sm font-medium text-foreground leading-relaxed">
                          {result.animal} movement detected. Activate {result.side} Siren to deter intrusion.
                       </p>
+                      <Button 
+                        className="w-full mt-4 bg-primary text-black font-bold shadow-md hover:bg-primary/90" 
+                        onClick={() => window.location.href = '/farm-heatmap?detected=true'}
+                      >
+                        <MapIcon className="mr-2 size-4" />
+                        Show Heat Map
+                      </Button>
                       <div className="flex gap-6 mt-4 pt-4 border-t border-primary/10">
                          <div>
                            <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Priority</p>
@@ -402,6 +448,19 @@ function DetectionPage() {
                         </Button>
                       </div>
                     </div>
+                    
+                    {/* View Heat Map CTA */}
+                    <div className="pt-4 mt-2 border-t border-border/50">
+                       <Link to="/farm-heatmap" search={{ detected: true }}>
+                         <Button className="w-full justify-between rounded-xl font-bold bg-gradient-to-r from-primary to-[#2E7D32] text-white hover:opacity-90 shadow-lg shadow-primary/20 h-12 transition-all group">
+                            <span className="flex items-center">
+                               <MapPin className="mr-2 size-4 text-white/80 group-hover:scale-110 transition-transform" />
+                               View Heat Map
+                            </span>
+                            <ArrowRight className="size-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                         </Button>
+                       </Link>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center opacity-60 py-12">
@@ -416,158 +475,7 @@ function DetectionPage() {
           </div>
         </div>
 
-        {/* ----------------- HORIZONTAL ROWS ----------------- */}
-        <div className="mt-8 space-y-8">
-          
-          {/* 3. DETECTION DETAILS (Horizontal Information Panel) */}
-          <PanelSection title="Detection Details" className={cardClasses}>
-            {result ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-in slide-in-from-bottom-4 pt-2">
-                 {[
-                   ["Animal", result.animal],
-                   ["Confidence", `${result.confidence}%`],
-                   ["Speed", `${result.speed} km/h`],
-                   ["Distance", `${result.distance} m`],
-                   ["Direction", result.direction],
-                   ["Threat", result.threatLevel],
-                   ["Zone", result.side],
-                   ["Camera", result.cameraId],
-                   ["Time", result.time],
-                   ["Weather", result.weather],
-                   ["Species", result.speciesType],
-                   ["Box", `${Math.round(result.box.w * 10)}×${Math.round(result.box.h * 10)}`],
-                 ].map(([k, v]) => (
-                   <div key={k} className="flex flex-col gap-1 border-l-2 border-border/50 pl-4">
-                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{k}</p>
-                     <p className="text-sm font-bold text-foreground">{v}</p>
-                   </div>
-                 ))}
-              </div>
-            ) : (
-              <div className="h-[72px] flex flex-col items-center justify-center text-muted-foreground opacity-60">
-                <p className="text-sm font-medium">No active detection data</p>
-              </div>
-            )}
-          </PanelSection>
 
-          <div className="grid gap-8 lg:grid-cols-12 items-stretch">
-            {/* 4. RECENT DETECTION HISTORY (Compact Table) */}
-            <div className="lg:col-span-8">
-              <PanelSection 
-                title="Recent Detection History" 
-                description="Logs of the last 4 events"
-                right={<Button variant="outline" size="sm" className="rounded-lg font-bold bg-white text-foreground hover:bg-surface border-border transition-colors h-8" asChild><Link to="/history">View Full History <ArrowRight className="ml-2 size-3.5" /></Link></Button>}
-                className={cn(cardClasses, "justify-start overflow-hidden flex flex-col")}
-              >
-                <div className="overflow-x-auto -mx-6 sm:-mx-8 -mb-6 sm:-mb-8 mt-2">
-                   <table className="min-w-full divide-y divide-border/50 border-t border-border">
-                     <thead className="bg-surface/30 sticky top-0">
-                       <tr>
-                         <th className="py-3 px-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Time</th>
-                         <th className="py-3 px-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Animal</th>
-                         <th className="py-3 px-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Camera</th>
-                         <th className="py-3 px-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Boundary</th>
-                         <th className="py-3 px-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Status</th>
-                       </tr>
-                     </thead>
-                     <tbody className="divide-y divide-border/50">
-                       {RECENT_HISTORY.map((h, i) => (
-                         <tr key={i} className="hover:bg-surface/50 transition-colors group cursor-default">
-                           <td className="py-3 px-6 text-sm font-medium text-foreground whitespace-nowrap">{h.time}</td>
-                           <td className="py-3 px-6 text-sm font-bold text-foreground whitespace-nowrap">{h.animal}</td>
-                           <td className="py-3 px-6 text-sm font-medium text-muted-foreground whitespace-nowrap">{h.camera}</td>
-                           <td className="py-3 px-6 text-sm font-medium text-muted-foreground whitespace-nowrap">{h.boundary}</td>
-                           <td className="py-3 px-6 whitespace-nowrap">
-                             <Badge variant="outline" className={cn(
-                               "rounded-md font-bold shadow-sm border-0 px-2 py-0.5 text-xs",
-                               h.status.includes("Activated") || h.status.includes("Triggered") ? "bg-warning/10 text-warning" : "bg-primary/10 text-primary"
-                             )}>
-                               {h.status}
-                             </Badge>
-                           </td>
-                         </tr>
-                       ))}
-                     </tbody>
-                   </table>
-                </div>
-              </PanelSection>
-            </div>
-
-            {/* 5. SMART VOICE ALERTS (Redesigned) */}
-            <div className="lg:col-span-4 flex flex-col">
-              <PanelSection title="Smart Voice Alerts" description="Automated warnings" className={cn(cardClasses, "flex-1 justify-between")}>
-                <div className="space-y-6 flex-1 pt-2">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Language</label>
-                      <Select value={voiceLang} onValueChange={setVoiceLang}>
-                        <SelectTrigger className="w-full rounded-xl bg-surface/50 border-border font-bold text-sm h-10">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {Object.keys(VOICE_LINES).map((l) => (
-                            <SelectItem key={l} value={l} className="rounded-lg font-bold">{l}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Duration</label>
-                      <div className="flex h-10 w-full items-center rounded-xl border border-border bg-surface/50 px-3 text-sm font-bold text-foreground">
-                         4.2 sec
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pt-2">
-                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex justify-between">
-                       Volume <span>{volume}%</span>
-                     </label>
-                     <input type="range" min="0" max="100" value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-primary h-1.5 bg-border rounded-full appearance-none" />
-                  </div>
-                  
-                  <div className="rounded-xl border border-border bg-surface/50 p-4 relative">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-xl" />
-                    <p className="text-xs font-bold leading-relaxed italic text-foreground px-2">
-                      "{result ? voiceLine : "Attention! Wild Boar detected near North Fence."}"
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 pt-6 mt-auto border-t border-border/50">
-                  <Button
-                    size="icon"
-                    className="size-11 rounded-xl bg-primary text-white shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all shrink-0"
-                    onClick={() => {
-                      setIsPlayingVoice(true);
-                      speakAlert(voiceLine, voiceLang, volume);
-                      setTimeout(() => setIsPlayingVoice(false), 2000);
-                    }}
-                  >
-                    {isPlayingVoice ? <Volume2 className="size-4 animate-pulse text-white" /> : <Play className="size-4 text-white" />}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="size-11 rounded-xl border border-border shrink-0 bg-white text-[#07111F] hover:bg-primary/10 hover:border-primary/50 transition-all active:scale-95"
-                    disabled={isRefreshing}
-                    onClick={() => {
-                      setIsRefreshing(true);
-                      setTimeout(() => setIsRefreshing(false), 800);
-                    }}
-                  >
-                    <RefreshCw className={`size-4 text-[#07111F] ${isRefreshing ? 'animate-spin' : ''}`} />
-                  </Button>
-                  <div className="flex-1 text-right">
-                     <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Status</p>
-                     <p className="text-xs font-bold text-primary flex items-center justify-end gap-1"><CheckCircle2 className="size-3.5" /> Ready for broadcast</p>
-                  </div>
-                </div>
-              </PanelSection>
-            </div>
-
-          </div>
-        </div>
       </div>
     </AppShell>
   );

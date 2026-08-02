@@ -1,25 +1,13 @@
+import http from 'http';
 import app from './app';
-import { env } from './config/env';
-import { checkConnection } from './database';
-import { logger } from './core/utils/logger';
+import { config } from './config';
+import { initSocket } from './socket';
 
+const server = http.createServer(app);
 
-const startServer = async () => {
-  try {
-    // Verify Database Connection before starting
-    const isDbConnected = await checkConnection();
-    
-    if (!isDbConnected) {
-      logger.warn('Server starting, but Database is not connected.');
-    }
+// Initialize Socket.io
+initSocket(server);
 
-    app.listen(env.PORT, () => {
-      logger.info(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
-    });
-  } catch (err) {
-    logger.error('Error starting server', err);
-    process.exit(1);
-  }
-};
-
-startServer();
+server.listen(config.port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${config.port} (0.0.0.0)`);
+});
