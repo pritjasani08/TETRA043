@@ -521,7 +521,11 @@ export function DashboardMockupCard({
             </div>
             <div className="flex flex-col min-w-0">
               <div className="truncate font-semibold leading-tight">{chip.title}</div>
-              {chip.subtitle && <div className="truncate text-[9px] text-white/50 leading-tight mt-0.5">{chip.subtitle}</div>}
+              {chip.subtitle && (
+                <div className="truncate text-[9px] text-white/50 leading-tight mt-0.5">
+                  {chip.subtitle}
+                </div>
+              )}
             </div>
           </div>
         );

@@ -237,9 +237,11 @@ export function MarkerContent({ children }: { children: React.ReactNode }) {
 export function MarkerLabel({
   children,
   position = "bottom",
+  className,
 }: {
   children: React.ReactNode;
   position?: "top" | "bottom" | "left" | "right";
+  className?: string;
 }) {
   const posClasses = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2.5",
@@ -250,7 +252,7 @@ export function MarkerLabel({
 
   return (
     <span
-      className={`absolute whitespace-nowrap text-[10px] font-mono font-bold tracking-wider text-emerald-400 bg-[#070913]/90 border border-white/10 px-2 py-0.5 rounded shadow-lg pointer-events-none ${posClasses[position]}`}
+      className={`absolute whitespace-nowrap text-[10px] font-mono font-bold tracking-wider text-emerald-400 bg-[#070913]/90 border border-white/10 px-2 py-0.5 rounded shadow-lg pointer-events-none ${posClasses[position]} ${className || ""}`}
     >
       {children}
     </span>

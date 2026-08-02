@@ -45,12 +45,12 @@ export function StatCard({
   return (
     <div className="panel p-6">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {label}
-        </p>
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
         {icon && <span className={cn("p-2 rounded-2xl bg-muted/50", tones[tone])}>{icon}</span>}
       </div>
-      <p className={cn("mt-4 font-display text-4xl font-bold tracking-tight", tones[tone])}>{value}</p>
+      <p className={cn("mt-4 font-display text-4xl font-bold tracking-tight", tones[tone])}>
+        {value}
+      </p>
       {hint && <p className="mt-2 text-xs font-medium text-muted-foreground/80">{hint}</p>}
     </div>
   );
@@ -93,7 +93,9 @@ export function PanelSection({
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-lg font-bold tracking-tight text-foreground">{title}</h2>
-          {description && <p className="mt-1 text-sm font-medium text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="mt-1 text-sm font-medium text-muted-foreground">{description}</p>
+          )}
         </div>
         {right && <div className="shrink-0">{right}</div>}
       </div>

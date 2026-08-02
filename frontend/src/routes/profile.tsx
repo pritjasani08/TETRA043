@@ -1,5 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogOut, Pencil, Phone, Smartphone, Sprout, Wheat, MapPin, CheckCircle2 } from "lucide-react";
+import {
+  LogOut,
+  Pencil,
+  Phone,
+  Smartphone,
+  Sprout,
+  Wheat,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -15,9 +24,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
-    meta: [
-      { title: "Farmer Profile & Mobile App — AgriShield AI" },
-    ],
+    meta: [{ title: "Farmer Profile & Mobile App — AgriShield AI" }],
   }),
   component: () => (
     <AuthGuard>
@@ -46,11 +53,13 @@ function ProfilePage() {
   const navigate = useNavigate();
 
   return (
-    <AppShell title="Profile & Farm Settings" subtitle="Manage your identity, farm details, and mobile app companion">
+    <AppShell
+      title="Profile & Farm Settings"
+      subtitle="Manage your identity, farm details, and mobile app companion"
+    >
       <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
           <div className="flex flex-col gap-8">
-            
             {/* Identity Card */}
             <div className="relative overflow-hidden rounded-[2rem] p-8 bg-white border border-border shadow-sm">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none opacity-50" />
@@ -59,9 +68,12 @@ function ProfilePage() {
                   {profile.fullName.slice(0, 1)}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-1">{profile.fullName}</h2>
+                  <h2 className="font-display text-3xl font-bold text-foreground mb-1">
+                    {profile.fullName}
+                  </h2>
                   <p className="text-base font-medium text-muted-foreground flex items-center gap-1.5 mb-4">
-                    <MapPin className="size-4" /> {profile.village}, {profile.district}, {profile.state}
+                    <MapPin className="size-4" /> {profile.village}, {profile.district},{" "}
+                    {profile.state}
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <span className="flex items-center gap-1.5 text-xs font-bold bg-surface px-3 py-1.5 rounded-lg border border-border text-foreground">
@@ -117,13 +129,16 @@ function ProfilePage() {
                     updateProfile(draft);
                     setEditing(false);
                     toast.success("Profile Updated", {
-                      icon: <CheckCircle2 className="size-5 text-primary" />
+                      icon: <CheckCircle2 className="size-5 text-primary" />,
                     });
                   }}
                 >
                   {FIELDS.map(([key, label]) => (
                     <div key={key} className="space-y-2">
-                      <Label htmlFor={key} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                      <Label
+                        htmlFor={key}
+                        className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                      >
                         {label}
                       </Label>
                       <Input
@@ -135,7 +150,11 @@ function ProfilePage() {
                     </div>
                   ))}
                   <div className="sm:col-span-2 flex justify-end mt-4">
-                    <Button type="submit" size="lg" className="rounded-xl font-bold px-8 shadow-lg shadow-primary/20">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
+                    >
                       Save Changes
                     </Button>
                   </div>
@@ -143,7 +162,10 @@ function ProfilePage() {
               ) : (
                 <dl className="grid gap-4 sm:grid-cols-2 mt-4">
                   {FIELDS.map(([key, label]) => (
-                    <div key={key} className="rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:bg-surface/80">
+                    <div
+                      key={key}
+                      className="rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:bg-surface/80"
+                    >
                       <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                         {label}
                       </dt>
@@ -165,9 +187,8 @@ function ProfilePage() {
             <div className="relative mx-auto w-full max-w-[320px] rounded-[3rem] border-8 border-slate-900 bg-white p-4 shadow-2xl h-[640px] flex flex-col overflow-hidden">
               {/* iPhone Dynamic Island */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-slate-900 rounded-b-3xl z-20" />
-              
+
               <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-4 space-y-4">
-                
                 {/* Mobile Header */}
                 <div className="text-center mb-6">
                   <h3 className="font-display font-bold text-lg text-slate-800">AgriShield AI</h3>
@@ -175,20 +196,37 @@ function ProfilePage() {
                 </div>
 
                 {/* Mobile Status Widget */}
-                <div className={cn(
-                  "rounded-2xl p-4 text-center transition-colors shadow-sm",
-                  systemOn ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"
-                )}>
-                  <p className={cn(
-                    "text-[10px] uppercase tracking-widest font-bold mb-1",
-                    systemOn ? "text-emerald-600" : "text-red-600"
-                  )}>System Status</p>
-                  <p className={cn("font-display text-2xl font-bold", systemOn ? "text-emerald-700" : "text-red-700")}>
+                <div
+                  className={cn(
+                    "rounded-2xl p-4 text-center transition-colors shadow-sm",
+                    systemOn
+                      ? "bg-emerald-50 border border-emerald-200"
+                      : "bg-red-50 border border-red-200",
+                  )}
+                >
+                  <p
+                    className={cn(
+                      "text-[10px] uppercase tracking-widest font-bold mb-1",
+                      systemOn ? "text-emerald-600" : "text-red-600",
+                    )}
+                  >
+                    System Status
+                  </p>
+                  <p
+                    className={cn(
+                      "font-display text-2xl font-bold",
+                      systemOn ? "text-emerald-700" : "text-red-700",
+                    )}
+                  >
                     {systemOn ? "Active Shield" : "Paused"}
                   </p>
                   <div className="mt-4 flex items-center justify-between text-xs font-bold text-slate-600 bg-white/50 py-1.5 px-3 rounded-lg border border-black/5">
                     <span>Monitoring</span>
-                    <Switch checked={systemOn} onCheckedChange={setSystemOn} className="scale-75 origin-right data-[state=checked]:bg-emerald-500" />
+                    <Switch
+                      checked={systemOn}
+                      onCheckedChange={setSystemOn}
+                      className="scale-75 origin-right data-[state=checked]:bg-emerald-500"
+                    />
                   </div>
                 </div>
 
@@ -199,11 +237,18 @@ function ProfilePage() {
                   </p>
                   <ul className="space-y-3">
                     {RECENT_ALERTS.slice(0, 3).map((a) => (
-                      <li key={a.id} className="flex flex-col bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm">
+                      <li
+                        key={a.id}
+                        className="flex flex-col bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm"
+                      >
                         <span className="font-bold text-sm text-slate-800">{a.animal}</span>
                         <div className="flex justify-between items-center mt-1">
-                          <span className="text-[11px] font-medium text-slate-500">{a.side} · {a.time}</span>
-                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">{a.confidence}%</span>
+                          <span className="text-[11px] font-medium text-slate-500">
+                            {a.side} · {a.time}
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                            {a.confidence}%
+                          </span>
                         </div>
                       </li>
                     ))}
@@ -217,7 +262,10 @@ function ProfilePage() {
                   </p>
                   <ul className="space-y-3">
                     {COMMUNITY_FEED.slice(0, 2).map((c) => (
-                      <li key={c.id} className="flex justify-between items-center text-xs bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm">
+                      <li
+                        key={c.id}
+                        className="flex justify-between items-center text-xs bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm"
+                      >
                         <span className="font-bold text-slate-800">{c.farm}</span>
                         <span className="font-medium text-slate-500 flex items-center gap-1">
                           {c.animal} · <span className="text-orange-500">{c.distance}</span>
@@ -229,7 +277,8 @@ function ProfilePage() {
               </div>
             </div>
             <p className="mt-6 text-center text-sm font-medium text-muted-foreground px-4">
-              Push notifications, background detection and emergency SOS ship with the native iOS and Android builds.
+              Push notifications, background detection and emergency SOS ship with the native iOS
+              and Android builds.
             </p>
           </PanelSection>
         </div>

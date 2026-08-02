@@ -75,9 +75,7 @@ const REGION_COORDS: Record<
 
 export const Route = createFileRoute("/heatmap")({
   head: () => ({
-    meta: [
-      { title: "Regional Heatmap — AgriShield AI" },
-    ],
+    meta: [{ title: "Regional Heatmap — AgriShield AI" }],
   }),
   component: () => (
     <AuthGuard>
@@ -97,9 +95,12 @@ function HeatmapPage() {
     >
       <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="grid gap-8 lg:grid-cols-[1.8fr_1fr]">
-          
           {/* Map Panel */}
-          <PanelSection title="Gujarat Activity Map" description="Tap a district marker for regional intelligence" className="p-4 md:p-6 pb-4">
+          <PanelSection
+            title="Gujarat Activity Map"
+            description="Tap a district marker for regional intelligence"
+            className="p-4 md:p-6 pb-4"
+          >
             <div className="h-[600px] w-full rounded-[2rem] overflow-hidden border border-border/50 shadow-inner bg-surface">
               <Map center={[71.7, 22.4]} zoom={8.15}>
                 {REGIONS.map((r) => {
@@ -128,7 +129,12 @@ function HeatmapPage() {
                         >
                           <span className="size-2 rounded-full bg-white/80 animate-ping" />
                         </div>
-                        <MarkerLabel position="bottom" className="font-bold text-xs bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-full mt-1 border border-border text-foreground">{r.name}</MarkerLabel>
+                        <MarkerLabel
+                          position="bottom"
+                          className="font-bold text-xs bg-white/80 backdrop-blur-md px-2 py-0.5 rounded-full mt-1 border border-border text-foreground"
+                        >
+                          {r.name}
+                        </MarkerLabel>
                       </MarkerContent>
 
                       <MarkerPopup className="w-72 p-0 rounded-2xl overflow-hidden border-none shadow-2xl">
@@ -149,8 +155,8 @@ function HeatmapPage() {
                         <div className="space-y-3 p-5 text-left bg-white">
                           <div>
                             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
-                               <Activity className="size-3 text-primary" />
-                               Intrusion Intensity: {r.detections} Logs
+                              <Activity className="size-3 text-primary" />
+                              Intrusion Intensity: {r.detections} Logs
                             </p>
                             <h3 className="text-lg font-display font-bold text-foreground leading-tight tracking-tight">
                               {r.name} District
@@ -195,26 +201,35 @@ function HeatmapPage() {
 
           {/* Right Column: Selected details and ranked lists */}
           <div className="flex flex-col gap-6">
-            <PanelSection title={selected.name} description="Selected district overview" className="p-6 md:p-8">
+            <PanelSection
+              title={selected.name}
+              description="Selected district overview"
+              className="p-6 md:p-8"
+            >
               <div className="flex flex-col gap-2">
-                 <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                     <div className="p-2.5 bg-primary/10 rounded-2xl text-primary">
-                        <MapPin className="size-6" />
-                     </div>
-                     <span className="font-display text-4xl font-bold tracking-tight text-foreground">
-                       {selected.detections}
-                     </span>
-                   </div>
-                   <RiskPill level={selected.risk} />
-                 </div>
-                 <p className="mt-3 text-sm font-medium text-muted-foreground leading-relaxed">
-                   Verified intrusion events logged in the last 30 days across participating farms in this region.
-                 </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-primary/10 rounded-2xl text-primary">
+                      <MapPin className="size-6" />
+                    </div>
+                    <span className="font-display text-4xl font-bold tracking-tight text-foreground">
+                      {selected.detections}
+                    </span>
+                  </div>
+                  <RiskPill level={selected.risk} />
+                </div>
+                <p className="mt-3 text-sm font-medium text-muted-foreground leading-relaxed">
+                  Verified intrusion events logged in the last 30 days across participating farms in
+                  this region.
+                </p>
               </div>
             </PanelSection>
 
-            <PanelSection title="Regional Ranking" description="Districts sorted by intrusion volume" className="p-6 md:p-8 flex-1">
+            <PanelSection
+              title="Regional Ranking"
+              description="Districts sorted by intrusion volume"
+              className="p-6 md:p-8 flex-1"
+            >
               <ul className="space-y-3 mt-2">
                 {[...REGIONS]
                   .sort((a, b) => b.detections - a.detections)
@@ -230,9 +245,25 @@ function HeatmapPage() {
                             : "border-border bg-white hover:border-primary/40 hover:bg-surface hover:-translate-y-0.5 shadow-sm",
                         )}
                       >
-                        <span className={cn("text-xs font-bold w-4", active === r.name ? "text-primary-foreground/80" : "text-muted-foreground")}>#{i + 1}</span>
+                        <span
+                          className={cn(
+                            "text-xs font-bold w-4",
+                            active === r.name
+                              ? "text-primary-foreground/80"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          #{i + 1}
+                        </span>
                         <span className="flex-1 font-bold text-sm">{r.name}</span>
-                        <span className={cn("text-sm font-bold tabular-nums", active === r.name ? "text-white" : "text-muted-foreground")}>{r.detections}</span>
+                        <span
+                          className={cn(
+                            "text-sm font-bold tabular-nums",
+                            active === r.name ? "text-white" : "text-muted-foreground",
+                          )}
+                        >
+                          {r.detections}
+                        </span>
                         <RiskPill level={r.risk} />
                       </button>
                     </li>
@@ -240,7 +271,6 @@ function HeatmapPage() {
               </ul>
             </PanelSection>
           </div>
-          
         </div>
       </div>
     </AppShell>
