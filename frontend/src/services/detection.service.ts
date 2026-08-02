@@ -30,13 +30,11 @@ export class DetectionService {
     }
 
     const formData = new FormData();
-    formData.append("image", file);
-    const data = await ApiClient.post<any>("/detections/analyze", formData);
+    formData.append('image', file);
+    return ApiClient.post<any>('/detection/process-image', formData);
+  }
 
-    // Map backend response
-    return {
-      detection: data.detection,
-      boundingBox: data.boundingBox || { x: 20, y: 20, w: 25, h: 30 },
-    };
+  static async getHistory() {
+    return ApiClient.get<any[]>('/detection/history');
   }
 }

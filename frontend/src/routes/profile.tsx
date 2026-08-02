@@ -19,6 +19,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAppState, type Profile } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthService } from "@/services/auth.service";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
 import { COMMUNITY_FEED, RECENT_ALERTS } from "@/lib/agrishield-data";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +37,7 @@ export const Route = createFileRoute("/profile")({
   ),
 });
 
-const FIELDS: Array<[keyof Profile, string]> = [
+const FIELDS: Array<[Exclude<keyof Profile, "farmBoundary">, string]> = [
   ["fullName", "Full Name"],
   ["mobile", "Mobile Number"],
   ["email", "Email Address"],
@@ -46,10 +50,25 @@ const FIELDS: Array<[keyof Profile, string]> = [
 ];
 
 function ProfilePage() {
-  const { profile, updateProfile, logout, systemOn, setSystemOn, settings, updateSettings } =
-    useAppState();
+  const { systemOn, setSystemOn } = useAppState();
+  const { logout, user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const profile: Omit<Profile, "farmBoundary"> = {
+    fullName: user?.name || "",
+    email: user?.email || "",
+    mobile: user?.mobile || "",
+    village: user?.village || "",
+    district: user?.district || "",
+    state: user?.state || "",
+    farmName: user?.farm_name || "",
+    farmSize: user?.farm_size || "",
+    cropType: user?.crop_type || "",
+  };
+
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(profile);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -102,8 +121,8 @@ function ProfilePage() {
                   <Button
                     variant="outline"
                     className="rounded-xl font-bold text-destructive hover:bg-destructive/10 border-border"
-                    onClick={() => {
-                      logout();
+                    onClick={async () => {
+                      await logout();
                       toast.success("Logged out");
                       navigate({ to: "/auth" });
                     }}
@@ -124,13 +143,30 @@ function ProfilePage() {
               {editing ? (
                 <form
                   className="grid gap-5 sm:grid-cols-2 mt-4"
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    updateProfile(draft);
-                    setEditing(false);
-                    toast.success("Profile Updated", {
-                      icon: <CheckCircle2 className="size-5 text-primary" />,
-                    });
+                    setSaving(true);
+                    try {
+                      await AuthService.updateProfile({
+                        name: draft.fullName,
+                        mobile: draft.mobile,
+                        village: draft.village,
+                        district: draft.district,
+                        state: draft.state,
+                        farm_name: draft.farmName,
+                        farm_size: draft.farmSize,
+                        crop_type: draft.cropType
+                      });
+                      await queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+                      setEditing(false);
+                      toast.success("Profile Updated", {
+                        icon: <CheckCircle2 className="size-5 text-primary" />
+                      });
+                    } catch (err: any) {
+                      toast.error("Failed to update profile", { description: err.message });
+                    } finally {
+                      setSaving(false);
+                    }
                   }}
                 >
                   {FIELDS.map(([key, label]) => (
@@ -150,12 +186,8 @@ function ProfilePage() {
                     </div>
                   ))}
                   <div className="sm:col-span-2 flex justify-end mt-4">
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
-                    >
-                      Save Changes
+                    <Button type="submit" disabled={saving} size="lg" className="rounded-xl font-bold px-8 shadow-lg shadow-primary/20">
+                      {saving ? "Saving..." : "Save Changes"}
                     </Button>
                   </div>
                 </form>

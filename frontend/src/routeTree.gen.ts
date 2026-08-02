@@ -15,11 +15,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DetectionRouteImport } from './routes/detection'
-import { Route as FarmSetupRouteImport } from './routes/farm-setup'
+import { Route as FarmHeatmapRouteImport } from './routes/farm-heatmap'
+import { Route as HardwareAlertRouteImport } from './routes/hardware-alert'
 import { Route as HeatmapRouteImport } from './routes/heatmap'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SetupBoundaryRouteImport } from './routes/setup-boundary'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,9 +53,14 @@ const DetectionRoute = DetectionRouteImport.update({
   path: '/detection',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FarmSetupRoute = FarmSetupRouteImport.update({
-  id: '/farm-setup',
-  path: '/farm-setup',
+const FarmHeatmapRoute = FarmHeatmapRouteImport.update({
+  id: '/farm-heatmap',
+  path: '/farm-heatmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HardwareAlertRoute = HardwareAlertRouteImport.update({
+  id: '/hardware-alert',
+  path: '/hardware-alert',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HeatmapRoute = HeatmapRouteImport.update({
@@ -76,6 +83,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SetupBoundaryRoute = SetupBoundaryRouteImport.update({
+  id: '/setup-boundary',
+  path: '/setup-boundary',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -84,11 +96,13 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
-  '/farm-setup': typeof FarmSetupRoute
+  '/farm-heatmap': typeof FarmHeatmapRoute
+  '/hardware-alert': typeof HardwareAlertRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/setup-boundary': typeof SetupBoundaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,11 +111,13 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
-  '/farm-setup': typeof FarmSetupRoute
+  '/farm-heatmap': typeof FarmHeatmapRoute
+  '/hardware-alert': typeof HardwareAlertRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/setup-boundary': typeof SetupBoundaryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,11 +127,13 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
-  '/farm-setup': typeof FarmSetupRoute
+  '/farm-heatmap': typeof FarmHeatmapRoute
+  '/hardware-alert': typeof HardwareAlertRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
+  '/setup-boundary': typeof SetupBoundaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +144,13 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
-    | '/farm-setup'
+    | '/farm-heatmap'
+    | '/hardware-alert'
     | '/heatmap'
     | '/history'
     | '/profile'
     | '/settings'
+    | '/setup-boundary'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,11 +159,13 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
-    | '/farm-setup'
+    | '/farm-heatmap'
+    | '/hardware-alert'
     | '/heatmap'
     | '/history'
     | '/profile'
     | '/settings'
+    | '/setup-boundary'
   id:
     | '__root__'
     | '/'
@@ -152,11 +174,13 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
-    | '/farm-setup'
+    | '/farm-heatmap'
+    | '/hardware-alert'
     | '/heatmap'
     | '/history'
     | '/profile'
     | '/settings'
+    | '/setup-boundary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,11 +190,13 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
   DetectionRoute: typeof DetectionRoute
-  FarmSetupRoute: typeof FarmSetupRoute
+  FarmHeatmapRoute: typeof FarmHeatmapRoute
+  HardwareAlertRoute: typeof HardwareAlertRoute
   HeatmapRoute: typeof HeatmapRoute
   HistoryRoute: typeof HistoryRoute
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
+  SetupBoundaryRoute: typeof SetupBoundaryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -217,11 +243,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DetectionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/farm-setup': {
-      id: '/farm-setup'
-      path: '/farm-setup'
-      fullPath: '/farm-setup'
-      preLoaderRoute: typeof FarmSetupRouteImport
+    '/farm-heatmap': {
+      id: '/farm-heatmap'
+      path: '/farm-heatmap'
+      fullPath: '/farm-heatmap'
+      preLoaderRoute: typeof FarmHeatmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hardware-alert': {
+      id: '/hardware-alert'
+      path: '/hardware-alert'
+      fullPath: '/hardware-alert'
+      preLoaderRoute: typeof HardwareAlertRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/heatmap': {
@@ -252,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/setup-boundary': {
+      id: '/setup-boundary'
+      path: '/setup-boundary'
+      fullPath: '/setup-boundary'
+      preLoaderRoute: typeof SetupBoundaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -262,11 +302,13 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
   DetectionRoute: DetectionRoute,
-  FarmSetupRoute: FarmSetupRoute,
+  FarmHeatmapRoute: FarmHeatmapRoute,
+  HardwareAlertRoute: HardwareAlertRoute,
   HeatmapRoute: HeatmapRoute,
   HistoryRoute: HistoryRoute,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
+  SetupBoundaryRoute: SetupBoundaryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

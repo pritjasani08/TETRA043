@@ -17,9 +17,12 @@ import { AppShell } from "@/components/AppShell";
 import { AuthGuard, PanelSection, RiskPill, StatCard } from "@/components/shield-ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { COMMUNITY_FEED, animalByName } from "@/lib/agrishield-data";
 import { useAppState } from "@/lib/app-state";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { CommunityService } from "../services/community.service";
+import { useState } from "react";
+import { animalByName } from "@/lib/agrishield-data";
 
 export const Route = createFileRoute("/community")({
   head: () => ({
@@ -34,7 +37,19 @@ export const Route = createFileRoute("/community")({
 
 function CommunityPage() {
   const { profile } = useAppState();
-  const nearby = COMMUNITY_FEED.filter((p) => p.severity !== "low");
+  const [visibleCount, setVisibleCount] = useState(4);
+
+  const { data: posts = [], isLoading: postsLoading } = useQuery({
+    queryKey: ['communityPosts'],
+    queryFn: CommunityService.getPosts
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['communityStats'],
+    queryFn: CommunityService.getStats
+  });
+
+  const nearby = posts.filter((p: any) => p.severity !== "low" && p.severity !== "Low").slice(0, 3);
 
   return (
     <AppShell
@@ -56,33 +71,19 @@ function CommunityPage() {
       }
     >
       <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2">
           <StatCard
             label="Connected Farms"
-            value={14}
-            hint="Active within 5 km"
+            value={statsLoading ? "..." : stats?.totalFarmers || 0}
+            hint="Total registered farmers"
             icon={<Users className="size-5" />}
           />
-          <StatCard
-            label="Shared Alerts Today"
-            value={9}
-            hint="6 high severity"
-            tone="warning"
+          <StatCard 
+            label="Shared Alerts Today" 
+            value={statsLoading ? "..." : stats?.todayAlerts || 0} 
+            hint="Detections across the network" 
+            tone="warning" 
             icon={<BellRing className="size-5" />}
-          />
-          <StatCard
-            label="Nearest Threat"
-            value="700 m"
-            hint="Wild boar, moving south-east"
-            tone="danger"
-            icon={<MapPin className="size-5" />}
-          />
-          <StatCard
-            label="Avg. Warning Lead"
-            value="11 min"
-            hint="Before arrival at your fence"
-            tone="primary"
-            icon={<Timer className="size-5" />}
           />
         </div>
 
@@ -94,8 +95,12 @@ function CommunityPage() {
             className="p-4 sm:p-6 bg-transparent border-none shadow-none"
           >
             <ul className="space-y-4">
-              {COMMUNITY_FEED.map((p) => {
-                const a = animalByName(p.animal);
+              {postsLoading ? (
+                <div className="p-8 text-center text-muted-foreground animate-pulse">Loading community alerts...</div>
+              ) : posts.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">No alerts shared yet.</div>
+              ) : posts.slice(0, visibleCount).map((p: any) => {
+                const a = animalByName(p.animal || "Unknown");
                 return (
                   <li
                     key={p.id}
@@ -111,27 +116,23 @@ function CommunityPage() {
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-display text-lg font-bold text-foreground truncate">
-                                {p.farmer}
-                              </span>
-                              <RiskPill level={p.severity} />
+                               <span className="font-display text-lg font-bold text-foreground truncate">{p.author?.name || 'Farmer'}</span>
+                               <RiskPill level={p.severity?.toLowerCase() || 'medium'} />
                             </div>
                             <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                              <MapPin className="size-3" /> {p.farm} · {p.village}
+                              <MapPin className="size-3" /> {profile.village}
                             </span>
                           </div>
                           <span className="text-sm font-bold text-muted-foreground bg-surface px-3 py-1 rounded-full">
-                            {p.time}
+                            {new Date(p.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
 
                         <div className="mt-4 p-4 bg-surface/50 rounded-2xl border border-border border-dashed flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div>
-                            <span className="font-bold text-foreground block mb-1 text-base">
-                              {p.animal} Detected
-                            </span>
+                            <span className="font-bold text-foreground block mb-1 text-base">{p.animal || 'Animal'} Detected</span>
                             <span className="text-muted-foreground text-sm font-medium">
-                              Moving {p.direction.toLowerCase()} · {p.distance} away
+                              Moving {p.direction?.toLowerCase() || 'nearby'} · {p.distance || 'Unknown distance'} away
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
@@ -140,15 +141,14 @@ function CommunityPage() {
                               className="gap-1.5 rounded-full px-3 py-1 bg-white"
                             >
                               <ArrowDownRight className="size-3.5 text-primary" />
-                              {p.notified} Notified
+                              Alert Broadcasted
                             </Badge>
-                            <Badge
-                              variant="secondary"
-                              className="gap-1.5 rounded-full px-3 py-1 bg-white"
-                            >
-                              <Timer className="size-3.5 text-warning" />
-                              ETA {p.eta}
-                            </Badge>
+                            {p.eta && (
+                              <Badge variant="secondary" className="gap-1.5 rounded-full px-3 py-1 bg-white">
+                                <Timer className="size-3.5 text-warning" />
+                                ETA {p.eta}
+                              </Badge>
+                            )}
                           </div>
                         </div>
 
@@ -159,7 +159,7 @@ function CommunityPage() {
                             className="rounded-xl font-bold hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
                             onClick={() =>
                               toast.success("Acknowledged", {
-                                description: `${p.farmer} notified that you are on alert.`,
+                                description: `${p.author?.name || 'Farmer'} notified that you are on alert.`,
                               })
                             }
                           >
@@ -172,6 +172,17 @@ function CommunityPage() {
                 );
               })}
             </ul>
+            {posts.length > visibleCount && (
+              <div className="mt-6 flex justify-center">
+                <Button 
+                  variant="outline" 
+                  className="rounded-full px-8 py-6 shadow-sm border-border font-bold bg-white hover:bg-surface"
+                  onClick={() => setVisibleCount(posts.length)}
+                >
+                  See More Alerts
+                </Button>
+              </div>
+            )}
           </PanelSection>
 
           {/* Right Column */}

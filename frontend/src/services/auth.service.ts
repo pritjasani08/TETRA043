@@ -6,52 +6,22 @@ export class AuthService {
   }
 
   static async login(credentials: { email?: string; mobile?: string; password: string }) {
-    if (this.useMocks) {
-      return new Promise<{ user: any; token: string }>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            user: { id: "1", name: "Rameshbhai", phone: credentials.mobile || "98250 41122" },
-            token: "demo-token-123",
-          });
-        }, 800);
-      });
-    }
-    return ApiClient.post<{ user: any; token: string }>("/auth/login", credentials);
+    return ApiClient.post<{ user: any; token: string }>('/auth/login', credentials);
   }
 
   static async signup(data: any) {
-    if (this.useMocks) {
-      return new Promise<{ user: any; token: string }>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            user: { id: "1", name: "Rameshbhai", phone: "98250 41122" },
-            token: "demo-token-123",
-          });
-        }, 800);
-      });
-    }
-    return ApiClient.post<{ user: any; token: string }>("/auth/signup", data);
+    return ApiClient.post<{ user: any; token: string }>('/auth/register', data);
   }
 
   static async me() {
-    if (this.useMocks) {
-      return new Promise<{ id: string; name: string }>((resolve) => {
-        setTimeout(() => {
-          resolve({ id: "1", name: "Rameshbhai" });
-        }, 300);
-      });
-    }
-    // Expected response format from backend is { user: UserDto }
-    const res = await ApiClient.get<{ user: any }>("/auth/me");
-    return res.user;
+    return ApiClient.get<any>('/auth/me');
   }
 
   static async logout() {
-    if (this.useMocks) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve({ success: true }), 300);
-      });
-    }
-    return ApiClient.post<{ success: boolean }>("/auth/logout", {});
+    return ApiClient.post<any>('/auth/logout', {});
+  }
+
+  static async updateProfile(data: any) {
+    return ApiClient.put<{ data: any }>('/auth/profile', data);
   }
 }

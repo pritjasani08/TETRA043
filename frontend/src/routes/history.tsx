@@ -16,12 +16,14 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format, isToday, isYesterday } from "date-fns";
 
 import { AppShell } from "@/components/AppShell";
 import { AuthGuard } from "@/components/shield-ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -35,9 +37,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ANIMALS, DETECTIONS, animalByName, Detection } from "@/lib/agrishield-data";
+import { ANIMALS, animalByName } from "@/lib/agrishield-data";
 import { cn } from "@/lib/utils";
 import { ActivityDetailsDrawer } from "@/components/ActivityDetailsDrawer";
+import { DetectionService } from "@/services/detection.service";
 
 export const Route = createFileRoute("/history")({
   head: () => ({
@@ -55,58 +58,60 @@ function HistoryPage() {
   const [animal, setAnimal] = useState("all");
   const [boundary, setBoundary] = useState("all");
   const [status, setStatus] = useState("all");
-  const [q, setQ] = useState("");
+  
+  const { data: detections = [], isLoading } = useQuery({
+    queryKey: ['history'],
+    queryFn: () => DetectionService.getHistory()
+  });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-
-  const [selectedEvent, setSelectedEvent] = useState<Detection | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
 
   const filteredRows = useMemo(() => {
     const limit = dateRange === "today" ? 1 : dateRange === "week" ? 7 : 31;
-    return DETECTIONS.filter(
-      (d) =>
-        (dateRange === "all" || d.dayOffset < limit) &&
-        (animal === "all" || d.animal === animal) &&
-        (boundary === "all" || d.side === boundary) &&
-        (status === "all" || d.status === status) &&
-        (q.trim() === "" ||
-          `${d.animal} ${d.side} ${d.id} ${d.status}`
-            .toLowerCase()
-            .includes(q.trim().toLowerCase())),
+    return detections.filter(
+      (d: any) => {
+        const daysAgo = (new Date().getTime() - new Date(d.created_at).getTime()) / (1000 * 3600 * 24);
+        return (dateRange === "all" || daysAgo < limit) &&
+               (animal === "all" || d.animal_name === animal) &&
+               (boundary === "all" || d.side === boundary) &&
+               (status === "all" || d.status === status);
+      }
     );
-  }, [dateRange, animal, boundary, status, q]);
+  }, [dateRange, animal, boundary, status, detections]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [dateRange, animal, boundary, status, q]);
-
-  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
-  const rows = filteredRows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // Group by date
+  const groupedEvents = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    filteredRows.forEach((d: any) => {
+      const dateObj = new Date(d.created_at);
+      let dateKey = format(dateObj, "MMM d, yyyy");
+      if (isToday(dateObj)) dateKey = "Today";
+      else if (isYesterday(dateObj)) dateKey = "Yesterday";
+      
+      if (!groups[dateKey]) groups[dateKey] = [];
+      groups[dateKey].push(d);
+    });
+    return groups;
+  }, [filteredRows]);
 
   const stats = useMemo(() => {
-    const todaysEvents = DETECTIONS.filter((d) => d.dayOffset === 0);
-    const confidences = DETECTIONS.map((d) => d.confidence);
-    const avgConf = Math.round(confidences.reduce((a, b) => a + b, 0) / (confidences.length || 1));
-
-    // Find most active boundary
-    const boundaries = DETECTIONS.reduce(
-      (acc, curr) => {
-        acc[curr.side] = (acc[curr.side] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-    const mostActiveBoundary =
-      Object.entries(boundaries).sort((a, b) => b[1] - a[1])[0]?.[0] || "None";
-
+    const todaysEvents = detections.filter((d: any) => isToday(new Date(d.created_at)));
+    const confidences = detections.map((d: any) => d.confidence * 100);
+    const avgConf = confidences.length ? Math.round(confidences.reduce((a: number, b: number) => a + b, 0) / confidences.length) : 0;
+    
+    const boundaries = detections.reduce((acc: any, curr: any) => {
+       acc[curr.side] = (acc[curr.side] || 0) + 1;
+       return acc;
+    }, {});
+    const mostActiveBoundary = Object.entries(boundaries).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || "None";
+    
     return {
       todayCount: todaysEvents.length,
       avgConf,
       mostActiveBoundary,
       highestRisk: "Wild Boar",
     };
-  }, []);
+  }, [detections]);
 
   const getStatusColor = (s: string) => {
     switch (s) {
@@ -223,16 +228,6 @@ function HistoryPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative w-full md:w-[220px]">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search events..."
-                className="pl-9 h-10 rounded-xl bg-surface border-border focus-visible:ring-primary/20"
-              />
-            </div>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -268,83 +263,77 @@ function HistoryPage() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rows.map((d) => (
-            <div
-              key={d.id}
-              className="flex flex-col bg-white rounded-3xl border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
-            >
-              {/* Card Header (Image + Title) */}
-              <div className="p-5 pb-4 border-b border-border/50 bg-gradient-to-br from-surface to-white flex gap-4 items-start relative">
-                <Badge
-                  className={cn(
-                    "absolute top-4 right-4 text-[10px] font-bold px-2 py-0.5",
-                    getStatusColor(d.status),
-                  )}
-                >
-                  {d.status}
-                </Badge>
+        <div className="flex flex-col gap-10">
+          {Object.entries(groupedEvents).map(([dateLabel, events]) => (
+            <div key={dateLabel}>
+              <h3 className="font-display text-lg font-bold text-foreground mb-4 border-b border-border pb-2">
+                {dateLabel}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map((d: any) => (
+                  <div 
+                    key={d.id} 
+                    className="flex flex-col bg-white rounded-3xl border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
+                  >
+                    {/* Card Header (Image + Title) */}
+                    <div className="p-5 pb-4 border-b border-border/50 bg-gradient-to-br from-surface to-white flex gap-4 items-start relative">
+                      <Badge className={cn("absolute top-4 right-4 text-[10px] font-bold px-2 py-0.5", getStatusColor(d.status || 'Detected'))}>
+                         {d.status || 'Detected'}
+                      </Badge>
+                      
+                      <div className="size-16 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center text-3xl">
+                         {animalByName(d.animal_name).emoji}
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <h3 className="font-bold text-lg text-foreground tracking-tight">{d.animal_name}</h3>
+                        <div className="flex flex-col gap-1 text-xs font-medium text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1.5"><MapPin className="size-3 text-primary/60" /> {d.side || 'Perimeter'}</span>
+                          <span className="flex items-center gap-1.5"><Calendar className="size-3 text-primary/60" /> {format(new Date(d.created_at), "h:mm a")}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="size-16 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center text-3xl">
-                  {animalByName(d.animal).emoji}
-                </div>
-                <div className="flex-1 pt-1">
-                  <h3 className="font-bold text-lg text-foreground tracking-tight">{d.animal}</h3>
-                  <div className="flex flex-col gap-1 text-xs font-medium text-muted-foreground mt-1">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="size-3 text-primary/60" /> {d.side}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="size-3 text-primary/60" /> {d.date} • {d.time}
-                    </span>
+                    {/* Natural Language Summary */}
+                    <div className="p-5 flex-1">
+                       <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                         {d.ai_insight || 'Detection recorded by AgriShield AI.'}
+                       </p>
+                    </div>
+
+                    {/* Actions Taken & Confidence */}
+                    <div className="px-5 pb-5 space-y-4">
+                       <div className="flex flex-wrap gap-2">
+                          {(d.actions || []).map((act: string, i: number) => (
+                             <Badge key={i} variant="secondary" className="bg-surface border-border text-foreground text-xs px-2 py-1 flex items-center gap-1">
+                               <CheckCircle2 className="size-3 text-primary" /> {act}
+                             </Badge>
+                          ))}
+                       </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="p-4 bg-surface/50 border-t border-border flex items-center justify-between">
+                       <div className="flex flex-col">
+                         <span className="text-[10px] uppercase font-bold text-muted-foreground">AI Confidence</span>
+                         <span className="text-sm font-bold text-foreground">{Math.round(d.confidence * 100)}%</span>
+                       </div>
+                       
+                       <Button 
+                         onClick={() => setSelectedEvent(d)}
+                         size="sm" 
+                         className="rounded-xl font-bold bg-primary text-white hover:bg-primary/90 shadow-md transition-all active:scale-95 px-4 h-9"
+                       >
+                         View Details <ChevronRight className="size-4 ml-1" />
+                       </Button>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Natural Language Summary */}
-              <div className="p-5 flex-1">
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                  {d.summary}
-                </p>
-              </div>
-
-              {/* Actions Taken & Confidence */}
-              <div className="px-5 pb-5 space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  {d.actions.map((act, i) => (
-                    <Badge
-                      key={i}
-                      variant="secondary"
-                      className="bg-surface border-border text-foreground text-xs px-2 py-1 flex items-center gap-1"
-                    >
-                      <CheckCircle2 className="size-3 text-primary" /> {act}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="p-4 bg-surface/50 border-t border-border flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                    AI Confidence
-                  </span>
-                  <span className="text-sm font-bold text-foreground">{d.confidence}%</span>
-                </div>
-
-                <Button
-                  onClick={() => setSelectedEvent(d)}
-                  size="sm"
-                  className="rounded-xl font-bold bg-primary text-white hover:bg-primary/90 shadow-md transition-all active:scale-95 px-4 h-9"
-                >
-                  View Details <ChevronRight className="size-4 ml-1" />
-                </Button>
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        {rows.length === 0 && (
+        {filteredRows.length === 0 && (
           <div className="p-16 bg-surface/50 border border-border rounded-[2rem] flex flex-col items-center justify-center text-center">
             <div className="size-24 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
               <ShieldAlert className="size-12 text-muted-foreground" />
@@ -358,39 +347,8 @@ function HistoryPage() {
           </div>
         )}
 
-        {/* Pagination Footer */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-8 mt-4">
-            <p className="text-sm font-medium text-muted-foreground">
-              Showing{" "}
-              <span className="text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-              <span className="text-foreground">
-                {Math.min(currentPage * itemsPerPage, filteredRows.length)}
-              </span>{" "}
-              of <span className="text-foreground">{filteredRows.length}</span> events
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="rounded-xl bg-white text-foreground hover:bg-surface border-border shadow-sm h-9"
-              >
-                <ChevronLeft className="size-4 mr-1" /> Prev
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="rounded-xl bg-white text-foreground hover:bg-surface border-border shadow-sm h-9 px-4"
-              >
-                Next <ChevronRight className="size-4 ml-1" />
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Pagination removed as groupings are infinite scrollable typically, or can be added later */}
+
       </div>
 
       <ActivityDetailsDrawer

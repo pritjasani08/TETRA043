@@ -70,9 +70,9 @@ function AnalyticsPage() {
     { name: "Cow", value: 10 },
   ];
 
-  const avgConfidence = 91;
-  const worst = { emoji: "🐗", name: "Wild Boar", week: 27 };
-  const worstRegion = { name: "Ahmedabad", detections: 128 };
+  const avgConfidence = data.avgConfidence || 0;
+  const worst = { emoji: "⚠️", name: data.worstThreat?.name || "None", count: data.worstThreat?.count || 0 };
+  const worstRegion = { name: data.worstRegion?.name || "Unknown", detections: data.worstRegion?.count || 0 };
 
   return (
     <AppShell
@@ -82,11 +82,11 @@ function AnalyticsPage() {
       <div className="mx-auto max-w-[1400px] animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
         {/* Top Stats Overview */}
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="Total Detections"
-            value={DETECTIONS.length * 6}
-            hint="Last 30 days"
-            icon={<Activity className="size-5" />}
+          <StatCard 
+            label="Total Detections" 
+            value={data.totalDetections || 0} 
+            hint="All-time detections" 
+            icon={<Activity className="size-5" />} 
           />
           <StatCard
             label="System Reliability"
@@ -97,22 +97,12 @@ function AnalyticsPage() {
           />
           <StatCard
             label="Highest Risk Threat"
-            value={
-              <span className="flex items-center gap-2">
-                {worst.emoji} {worst.name}
-              </span>
-            }
-            hint={`${worst.week} detections this week`}
+            value={<span className="flex items-center gap-2">{worst.emoji} {worst.name}</span>}
+            hint={`${worst.count} total detections`}
             tone="warning"
             icon={<AlertTriangle className="size-5" />}
           />
-          <StatCard
-            label="Most Vulnerable Region"
-            value={worstRegion.name}
-            hint={`${worstRegion.detections} district detections`}
-            tone="danger"
-            icon={<MapPin className="size-5" />}
-          />
+
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">

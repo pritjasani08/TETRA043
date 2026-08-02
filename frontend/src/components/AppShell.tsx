@@ -11,6 +11,7 @@ import {
   Users,
   Menu,
   ArrowUp,
+  Flame,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -20,13 +21,14 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { useAppState } from "@/lib/app-state";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/detection", label: "Camera Feed", icon: Camera },
   { to: "/history", label: "History & Logs", icon: History },
-  { to: "/heatmap", label: "Heat Map", icon: Map },
+  { to: "/farm-heatmap", label: "Heat Map", icon: Flame },
   { to: "/analytics", label: "Data Analytics", icon: BarChart3 },
   { to: "/community", label: "Community", icon: Users },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
@@ -80,15 +82,19 @@ function Brand() {
   );
 }
 
-interface AppShellProps {
+export function AppShell({
+  title,
+  subtitle,
+  children,
+  actions,
+}: {
   title: string;
   subtitle?: string;
   children: ReactNode;
   actions?: ReactNode;
-}
-
-export function AppShell({ title, subtitle, children, actions }: AppShellProps) {
-  const { systemOn, setSystemOn, offSince, profile } = useAppState();
+}) {
+  const { systemOn, setSystemOn, offSince } = useAppState();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -159,15 +165,13 @@ export function AppShell({ title, subtitle, children, actions }: AppShellProps) 
             to="/profile"
             className="flex items-center gap-3 rounded-[1.5rem] border border-sidebar-border bg-white px-3 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
           >
-            <span className="grid size-10 place-items-center rounded-full bg-accent text-white font-display text-sm font-bold shadow-sm">
-              {profile.fullName.slice(0, 1)}
+            <span className="grid size-10 place-items-center rounded-full bg-accent text-white font-display text-sm font-bold shadow-sm uppercase">
+              {(user?.name || "G").slice(0, 1)}
             </span>
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-bold text-foreground">
-                {profile.fullName}
-              </span>
+              <span className="block truncate text-sm font-bold text-foreground">{user?.name || "Guest"}</span>
               <span className="block truncate text-xs font-medium text-muted-foreground">
-                {profile.farmName}
+                {user?.farm_name || user?.role || "Farm Settings"}
               </span>
             </span>
           </Link>
@@ -187,14 +191,30 @@ export function AppShell({ title, subtitle, children, actions }: AppShellProps) 
                 <Menu className="size-5 text-foreground" />
               </Button>
             </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-[300px] border-r-0 bg-sidebar p-6 sm:max-w-sm rounded-r-[2rem]"
-            >
-              <div className="mb-8 mt-2">
+            <SheetContent side="left" className="w-[300px] border-r-0 bg-sidebar p-6 sm:max-w-sm rounded-r-[2rem] flex flex-col">
+              <div className="mb-8 mt-2 shrink-0">
                 <Brand />
               </div>
-              <NavList onNavigate={() => setOpen(false)} />
+              <div className="flex-1 overflow-y-auto">
+                <NavList onNavigate={() => setOpen(false)} />
+              </div>
+              <div className="mt-auto pt-6 shrink-0">
+                <Link
+                  to="/profile"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 rounded-[1.5rem] border border-sidebar-border bg-white px-3 py-3 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                >
+                  <span className="grid size-10 place-items-center rounded-full bg-accent text-white font-display text-sm font-bold shadow-sm uppercase">
+                    {(user?.name || "G").slice(0, 1)}
+                  </span>
+                  <span className="min-w-0 leading-tight">
+                    <span className="block truncate text-sm font-bold text-foreground">{user?.name || "Guest"}</span>
+                    <span className="block truncate text-xs font-medium text-muted-foreground">
+                      {user?.farm_name || user?.role || "Farm Settings"}
+                    </span>
+                  </span>
+                </Link>
+              </div>
             </SheetContent>
           </Sheet>
 
@@ -202,7 +222,11 @@ export function AppShell({ title, subtitle, children, actions }: AppShellProps) 
             <h1 className="font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">
               {title}
             </h1>
-            {subtitle && <p className="text-sm font-medium text-muted-foreground">{subtitle}</p>}
+            {subtitle && (
+              <p className="text-sm text-muted-foreground font-medium hidden sm:block">
+                {subtitle}
+              </p>
+            )}
           </div>
 
           <div className="ml-auto flex items-center gap-3">

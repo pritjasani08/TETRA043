@@ -18,6 +18,11 @@ export type Profile = {
   farmName: string;
   farmSize: string;
   cropType: string;
+  farmBoundary?: {
+    name: string;
+    coordinates: [number, number][]; // Array of [Lat, Lng]
+    area: number; // in acres
+  };
 };
 
 export type Settings = {
