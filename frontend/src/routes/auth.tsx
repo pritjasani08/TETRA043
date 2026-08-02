@@ -16,7 +16,11 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — AgriShield AI Crop Guard" },
-      { name: "description", content: "Log in or register your farm to start AI animal intrusion monitoring with AgriShield AI." },
+      {
+        name: "description",
+        content:
+          "Log in or register your farm to start AI animal intrusion monitoring with AgriShield AI.",
+      },
     ],
   }),
   component: AuthPage,
@@ -33,7 +37,7 @@ function AuthPage() {
   const [formData, setFormData] = useState({
     mobile: "98250 41122",
     password: "demo",
-    remember: true
+    remember: true,
   });
 
   const [signup, setSignup] = useState({
@@ -57,12 +61,12 @@ function AuthPage() {
 
   const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    
+
     if (/[^\d\s]/.test(val)) {
       toast.error("Invalid Input", { description: "Only numbers are allowed for mobile number." });
       return;
     }
-    
+
     const rawDigits = val.replace(/\D/g, "");
     if (rawDigits.length > 10) {
       toast.error("Limit Exceeded", { description: "Mobile number cannot exceed 10 digits." });
@@ -119,7 +123,6 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row bg-[#07111F] text-white overflow-hidden relative selection:bg-[#A3E635]/30">
-
       {/* Global Background Elements */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-[#A3E635]/5 rounded-full blur-[120px] lg:hidden" />
@@ -135,13 +138,13 @@ function AuthPage() {
             }}
             animate={{
               opacity: [0, 0.7, 0],
-              y: [0, -30, 0]
+              y: [0, -30, 0],
             }}
             transition={{
               duration: 3 + Math.random() * 3,
               repeat: Infinity,
               delay: Math.random() * 4,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -149,7 +152,6 @@ function AuthPage() {
 
       {/* Left Panel - Premium Typography & Stats */}
       <div className="relative z-10 flex flex-col justify-center px-6 py-12 lg:px-16 xl:px-24 w-full lg:w-[55%] xl:w-[60%] lg:min-h-screen">
-
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -171,7 +173,8 @@ function AuthPage() {
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
             className="font-display text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.15] tracking-tight mb-8"
           >
-            Protect every harvest.<br />
+            Protect every harvest.
+            <br />
             <span className="text-white/40 font-light">Before wildlife reaches it.</span>
           </motion.h1>
 
@@ -182,20 +185,19 @@ function AuthPage() {
             className="text-lg lg:text-xl text-white/70 leading-relaxed font-light space-y-6"
           >
             <p>
-              Real-time AI detects wild animals,<br />
-              sends instant Gujarati voice alerts,<br />
-              and helps protect your crops<br />
+              Real-time AI detects wild animals,
+              <br />
+              sends instant Gujarati voice alerts,
+              <br />
+              and helps protect your crops
+              <br />
               before damage occurs.
             </p>
 
             <div className="w-16 h-[1px] bg-white/20" />
 
             <ul className="space-y-3 pt-2">
-              {[
-                "AI Powered",
-                "24×7 Monitoring",
-                "Instant Voice Alerts"
-              ].map((item, idx) => (
+              {["AI Powered", "24×7 Monitoring", "Instant Voice Alerts"].map((item, idx) => (
                 <li key={idx} className="flex items-center gap-3 text-base text-white/80">
                   <div className="grid size-5 place-items-center rounded-full bg-[#A3E635]/10 text-[#A3E635]">
                     <Check className="size-3" />
@@ -210,7 +212,6 @@ function AuthPage() {
 
       {/* Right Panel - Direct Content Login */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12 lg:p-12 w-full lg:w-[45%] xl:w-[40%]">
-
         <motion.div
           initial={{ opacity: 0, scale: 0.97, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -432,7 +433,6 @@ function AuthPage() {
 
         </motion.div>
       </div>
-
     </div>
   );
 }

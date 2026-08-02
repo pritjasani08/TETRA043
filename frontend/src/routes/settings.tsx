@@ -22,9 +22,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
-    meta: [
-      { title: "Alert & System Settings — AgriShield AI" },
-    ],
+    meta: [{ title: "Alert & System Settings — AgriShield AI" }],
   }),
   component: () => (
     <AuthGuard>
@@ -37,24 +35,47 @@ function SettingsPage() {
   const { settings, updateSettings, systemOn, setSystemOn, offSince } = useAppState();
 
   return (
-    <AppShell title="System & Alerts" subtitle="Configure language, notification routing, and master security controls">
+    <AppShell
+      title="System & Alerts"
+      subtitle="Configure language, notification routing, and master security controls"
+    >
       <div className="mx-auto max-w-[1200px] animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="grid gap-8 lg:grid-cols-2">
-          
-          <PanelSection title="Master Control" description="Global toggle for detection and AI alerts" className="p-6 md:p-8">
-            <div className={cn(
-              "flex flex-col sm:flex-row sm:items-center justify-between rounded-[1.5rem] border p-6 transition-colors shadow-sm",
-              systemOn ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5"
-            )}>
+          <PanelSection
+            title="Master Control"
+            description="Global toggle for detection and AI alerts"
+            className="p-6 md:p-8"
+          >
+            <div
+              className={cn(
+                "flex flex-col sm:flex-row sm:items-center justify-between rounded-[1.5rem] border p-6 transition-colors shadow-sm",
+                systemOn
+                  ? "border-primary/30 bg-primary/5"
+                  : "border-destructive/30 bg-destructive/5",
+              )}
+            >
               <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                <div className={cn(
-                  "size-12 rounded-full flex items-center justify-center",
-                  systemOn ? "bg-primary text-white shadow-lg shadow-primary/30" : "bg-destructive text-white shadow-lg shadow-destructive/30"
-                )}>
-                  {systemOn ? <ShieldCheck className="size-6" /> : <ShieldAlert className="size-6" />}
+                <div
+                  className={cn(
+                    "size-12 rounded-full flex items-center justify-center",
+                    systemOn
+                      ? "bg-primary text-white shadow-lg shadow-primary/30"
+                      : "bg-destructive text-white shadow-lg shadow-destructive/30",
+                  )}
+                >
+                  {systemOn ? (
+                    <ShieldCheck className="size-6" />
+                  ) : (
+                    <ShieldAlert className="size-6" />
+                  )}
                 </div>
                 <div>
-                  <h3 className={cn("font-display text-xl font-bold tracking-tight", systemOn ? "text-primary" : "text-destructive")}>
+                  <h3
+                    className={cn(
+                      "font-display text-xl font-bold tracking-tight",
+                      systemOn ? "text-primary" : "text-destructive",
+                    )}
+                  >
                     {systemOn ? "System Armed" : "System Disarmed"}
                   </h3>
                   <p className="mt-0.5 text-sm font-medium text-muted-foreground">
@@ -84,12 +105,19 @@ function SettingsPage() {
             {!systemOn && offSince && (
               <div className="mt-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning font-semibold flex items-start gap-3">
                 <BellRing className="size-5 shrink-0 mt-0.5" />
-                <p>Idle reminder armed: if monitoring stays off for more than four hours you will be prompted to re-enable monitoring.</p>
+                <p>
+                  Idle reminder armed: if monitoring stays off for more than four hours you will be
+                  prompted to re-enable monitoring.
+                </p>
               </div>
             )}
           </PanelSection>
 
-          <PanelSection title="Localization" description="Interface and localized voice alert settings" className="p-6 md:p-8">
+          <PanelSection
+            title="Localization"
+            description="Interface and localized voice alert settings"
+            className="p-6 md:p-8"
+          >
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-wider">
@@ -133,12 +161,23 @@ function SettingsPage() {
               </div>
             </div>
             <div className="mt-6 rounded-xl border border-border bg-surface/50 p-4 text-sm font-medium italic text-muted-foreground border-l-4 border-l-primary flex items-center gap-3">
-               <Volume2 className="size-5 text-primary opacity-50 shrink-0" />
-               <p>"{ (VOICE_LINES[settings.voiceLanguage] ?? VOICE_LINES["English"]!)("Wild Boar", "North Fence") }"</p>
+              <Volume2 className="size-5 text-primary opacity-50 shrink-0" />
+              <p>
+                "
+                {(VOICE_LINES[settings.voiceLanguage] ?? VOICE_LINES["English"]!)(
+                  "Wild Boar",
+                  "North Fence",
+                )}
+                "
+              </p>
             </div>
           </PanelSection>
 
-          <PanelSection title="Voice Alerts" description="Hardware speaker volume and controls" className="p-6 md:p-8">
+          <PanelSection
+            title="Voice Alerts"
+            description="Hardware speaker volume and controls"
+            className="p-6 md:p-8"
+          >
             <div className="flex items-center justify-between rounded-2xl border border-border p-4 bg-surface/50 shadow-sm mb-6">
               <Label htmlFor="voice-toggle" className="text-base font-bold">
                 Enable Hardware Voice Alerts
@@ -152,8 +191,12 @@ function SettingsPage() {
             </div>
             <div className="space-y-5">
               <div className="flex items-center justify-between text-sm">
-                <Label className="font-bold text-muted-foreground uppercase tracking-wider">Output Volume</Label>
-                <span className="font-bold text-lg tabular-nums text-foreground">{settings.volume}%</span>
+                <Label className="font-bold text-muted-foreground uppercase tracking-wider">
+                  Output Volume
+                </Label>
+                <span className="font-bold text-lg tabular-nums text-foreground">
+                  {settings.volume}%
+                </span>
               </div>
               <Slider
                 value={[settings.volume]}
@@ -183,7 +226,11 @@ function SettingsPage() {
             </div>
           </PanelSection>
 
-          <PanelSection title="Notification Routing" description="Configure what alerts reach your smartphone" className="p-6 md:p-8">
+          <PanelSection
+            title="Notification Routing"
+            description="Configure what alerts reach your smartphone"
+            className="p-6 md:p-8"
+          >
             <RadioGroup
               value={settings.notifications}
               onValueChange={(v) => updateSettings({ notifications: v as "all" | "high" | "off" })}
@@ -203,12 +250,14 @@ function SettingsPage() {
                   <RadioGroupItem value={value} className="mt-1" />
                   <span className="flex-1">
                     <span className="block text-base font-bold text-foreground">{label}</span>
-                    <span className="block text-sm font-medium text-muted-foreground mt-0.5">{hint}</span>
+                    <span className="block text-sm font-medium text-muted-foreground mt-0.5">
+                      {hint}
+                    </span>
                   </span>
                 </Label>
               ))}
             </RadioGroup>
-            
+
             <Button
               className="mt-6 w-full rounded-xl font-bold shadow-sm"
               variant="secondary"

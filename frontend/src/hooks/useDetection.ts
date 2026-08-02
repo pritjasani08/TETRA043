@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-import { DetectionService } from '../services/detection.service';
+import { useMutation } from "@tanstack/react-query";
+import { DetectionService } from "../services/detection.service";
 
 export function useDetection() {
   return useMutation({

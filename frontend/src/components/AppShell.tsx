@@ -52,7 +52,9 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
           >
             <Icon className="size-[18px] transition-transform group-hover:scale-110" />
             {label}
-            {active && <span className="ml-auto size-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] pulse-dot" />}
+            {active && (
+              <span className="ml-auto size-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] pulse-dot" />
+            )}
           </Link>
         );
       })}
@@ -67,7 +69,9 @@ function Brand() {
         <ShieldCheck className="size-6" />
       </span>
       <span className="leading-tight">
-        <span className="block font-display text-lg font-bold tracking-tight text-foreground">AgriShield AI</span>
+        <span className="block font-display text-lg font-bold tracking-tight text-foreground">
+          AgriShield AI
+        </span>
         <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Premium Guard
         </span>
@@ -76,15 +80,14 @@ function Brand() {
   );
 }
 
-export function AppShell({
-  title,
-  children,
-  actions,
-}: {
+interface AppShellProps {
   title: string;
+  subtitle?: string;
   children: ReactNode;
   actions?: ReactNode;
-}) {
+}
+
+export function AppShell({ title, subtitle, children, actions }: AppShellProps) {
   const { systemOn, setSystemOn, offSince, profile } = useAppState();
   const [open, setOpen] = useState(false);
 
@@ -109,12 +112,12 @@ export function AppShell({
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -123,7 +126,7 @@ export function AppShell({
       <aside className="sticky top-4 m-4 hidden h-[calc(100vh-32px)] w-[280px] shrink-0 flex-col gap-8 rounded-[2rem] border border-sidebar-border bg-sidebar px-5 py-8 shadow-xl shadow-black/[0.02] lg:flex z-50">
         <Brand />
         <NavList />
-        
+
         <div className="mt-auto">
           {/* Status Card inside Sidebar */}
           <div className="rounded-3xl border border-sidebar-border bg-gradient-to-b from-sidebar to-sidebar-accent/50 p-5 shadow-sm mb-4">
@@ -139,12 +142,15 @@ export function AppShell({
               >
                 {systemOn ? "Secured" : "Paused"}
               </span>
-              <Switch checked={systemOn} onCheckedChange={setSystemOn} aria-label="Security system" className={cn("data-[state=checked]:bg-primary")} />
+              <Switch
+                checked={systemOn}
+                onCheckedChange={setSystemOn}
+                aria-label="Security system"
+                className={cn("data-[state=checked]:bg-primary")}
+              />
             </div>
             <p className="mt-3 text-xs font-medium leading-relaxed text-muted-foreground">
-              {systemOn
-                ? "AI actively analyzing perimeter."
-                : "Monitoring disabled. Farm exposed."}
+              {systemOn ? "AI actively analyzing perimeter." : "Monitoring disabled. Farm exposed."}
             </p>
           </div>
 
@@ -157,7 +163,9 @@ export function AppShell({
               {profile.fullName.slice(0, 1)}
             </span>
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-bold text-foreground">{profile.fullName}</span>
+              <span className="block truncate text-sm font-bold text-foreground">
+                {profile.fullName}
+              </span>
               <span className="block truncate text-xs font-medium text-muted-foreground">
                 {profile.farmName}
               </span>
@@ -171,32 +179,40 @@ export function AppShell({
         <header className="sticky top-4 z-40 mx-4 md:mx-10 mb-6 flex flex-wrap items-center gap-4 bg-white/10 px-6 py-4 backdrop-blur-[32px] border border-white/40 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl lg:hidden bg-white/30 shadow-sm border-border backdrop-blur-md">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-xl lg:hidden bg-white/30 shadow-sm border-border backdrop-blur-md"
+              >
                 <Menu className="size-5 text-foreground" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] border-r-0 bg-sidebar p-6 sm:max-w-sm rounded-r-[2rem]">
+            <SheetContent
+              side="left"
+              className="w-[300px] border-r-0 bg-sidebar p-6 sm:max-w-sm rounded-r-[2rem]"
+            >
               <div className="mb-8 mt-2">
                 <Brand />
               </div>
               <NavList onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          
+
           <div className="min-w-0 flex-1 flex flex-col items-start gap-1">
             <h1 className="font-display text-2xl font-bold tracking-tight text-foreground md:text-3xl">
               {title}
             </h1>
+            {subtitle && <p className="text-sm font-medium text-muted-foreground">{subtitle}</p>}
           </div>
-          
+
           <div className="ml-auto flex items-center gap-3">
             {actions}
             <Badge
               variant="outline"
               className={cn(
                 "hidden gap-2 rounded-full border-0 px-4 py-2 font-semibold shadow-sm sm:flex transition-colors duration-500",
-                systemOn 
-                  ? "bg-white text-primary ring-1 ring-border" 
+                systemOn
+                  ? "bg-white text-primary ring-1 ring-border"
                   : "bg-destructive/10 text-destructive ring-1 ring-destructive/20",
               )}
             >
@@ -211,7 +227,7 @@ export function AppShell({
             </Badge>
           </div>
         </header>
-        
+
         <main className="flex-1 px-4 pb-12 pt-6 md:px-10">{children}</main>
       </div>
 
@@ -222,7 +238,9 @@ export function AppShell({
         onClick={scrollToTop}
         className={cn(
           "fixed bottom-6 right-6 z-50 rounded-full shadow-lg transition-all duration-300",
-          showScrollTop ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"
+          showScrollTop
+            ? "translate-y-0 opacity-100"
+            : "translate-y-10 opacity-0 pointer-events-none",
         )}
       >
         <ArrowUp className="size-5" />
