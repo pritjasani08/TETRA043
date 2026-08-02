@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { 
-  Download, Search, Calendar, MapPin, Activity, ShieldAlert, 
-  CheckCircle2, ChevronRight, ChevronLeft, FileText, Printer, Share2, 
-  AlertTriangle, TrendingUp 
+import {
+  Download,
+  Search,
+  Calendar,
+  MapPin,
+  Activity,
+  ShieldAlert,
+  CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  FileText,
+  Printer,
+  Share2,
+  AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -33,9 +44,7 @@ import { DetectionService } from "@/services/detection.service";
 
 export const Route = createFileRoute("/history")({
   head: () => ({
-    meta: [
-      { title: "Activity Log — AgriShield AI" },
-    ],
+    meta: [{ title: "Activity Log — AgriShield AI" }],
   }),
   component: () => (
     <AuthGuard>
@@ -100,50 +109,65 @@ function HistoryPage() {
       todayCount: todaysEvents.length,
       avgConf,
       mostActiveBoundary,
-      highestRisk: "Wild Boar"
+      highestRisk: "Wild Boar",
     };
   }, [detections]);
 
   const getStatusColor = (s: string) => {
-     switch (s) {
-       case "Resolved": return "bg-primary/10 text-primary border-transparent";
-       case "Action Taken": return "bg-orange-500/10 text-orange-600 border-transparent";
-       case "Needs Review": return "bg-destructive/10 text-destructive border-transparent";
-       case "Monitoring": return "bg-blue-500/10 text-blue-600 border-transparent";
-       default: return "bg-surface text-foreground";
-     }
+    switch (s) {
+      case "Resolved":
+        return "bg-primary/10 text-primary border-transparent";
+      case "Action Taken":
+        return "bg-orange-500/10 text-orange-600 border-transparent";
+      case "Needs Review":
+        return "bg-destructive/10 text-destructive border-transparent";
+      case "Monitoring":
+        return "bg-blue-500/10 text-blue-600 border-transparent";
+      default:
+        return "bg-surface text-foreground";
+    }
   };
 
   return (
-    <AppShell title="Activity Log" subtitle="Farmer-friendly monitoring and historical event records">
+    <AppShell
+      title="Activity Log"
+      subtitle="Farmer-friendly monitoring and historical event records"
+    >
       <div className="mx-auto max-w-[1200px] animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
-        
         {/* Quick Summary Banner */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-           <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Calendar className="size-4" /> <span className="text-xs font-bold uppercase tracking-wider">Today's Events</span>
-              </div>
-              <p className="text-3xl font-display font-bold text-foreground">{stats.todayCount}</p>
-           </div>
-           <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <AlertTriangle className="size-4" /> <span className="text-xs font-bold uppercase tracking-wider">Highest Risk</span>
-              </div>
-              <p className="text-xl font-display font-bold text-foreground mt-1">{stats.highestRisk}</p>
-           </div>
-           <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <MapPin className="size-4" /> <span className="text-xs font-bold uppercase tracking-wider">Most Active</span>
-              </div>
-              <p className="text-xl font-display font-bold text-foreground mt-1">{stats.mostActiveBoundary}</p>
-           </div>
-           <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <TrendingUp className="size-4" /> <span className="text-xs font-bold uppercase tracking-wider">Avg Confidence</span>
-              </div>
-              <p className="text-3xl font-display font-bold text-foreground">{stats.avgConf}%</p>
-           </div>
+          <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <Calendar className="size-4" />{" "}
+              <span className="text-xs font-bold uppercase tracking-wider">Today's Events</span>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{stats.todayCount}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <AlertTriangle className="size-4" />{" "}
+              <span className="text-xs font-bold uppercase tracking-wider">Highest Risk</span>
+            </div>
+            <p className="text-xl font-display font-bold text-foreground mt-1">
+              {stats.highestRisk}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <MapPin className="size-4" />{" "}
+              <span className="text-xs font-bold uppercase tracking-wider">Most Active</span>
+            </div>
+            <p className="text-xl font-display font-bold text-foreground mt-1">
+              {stats.mostActiveBoundary}
+            </p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col justify-center">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <TrendingUp className="size-4" />{" "}
+              <span className="text-xs font-bold uppercase tracking-wider">Avg Confidence</span>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground">{stats.avgConf}%</p>
+          </div>
         </div>
 
         {/* Filters Section */}
@@ -206,7 +230,11 @@ function HistoryPage() {
           <div className="flex items-center gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10 rounded-xl border border-border bg-white shadow-sm hover:bg-surface hover:text-primary text-foreground transition-all active:scale-95">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-10 rounded-xl border border-border bg-white shadow-sm hover:bg-surface hover:text-primary text-foreground transition-all active:scale-95"
+                >
                   <Download className="size-4 mr-2" /> Export
                 </Button>
               </DropdownMenuTrigger>
@@ -310,7 +338,9 @@ function HistoryPage() {
             <div className="size-24 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
               <ShieldAlert className="size-12 text-muted-foreground" />
             </div>
-            <h3 className="text-2xl font-display font-bold text-foreground mb-3">No animal detections found.</h3>
+            <h3 className="text-2xl font-display font-bold text-foreground mb-3">
+              No animal detections found.
+            </h3>
             <p className="text-muted-foreground max-w-sm text-lg">
               Your farm remained protected during this period. Try adjusting your filters.
             </p>
@@ -320,11 +350,11 @@ function HistoryPage() {
         {/* Pagination removed as groupings are infinite scrollable typically, or can be added later */}
 
       </div>
-      
-      <ActivityDetailsDrawer 
-        event={selectedEvent} 
-        open={!!selectedEvent} 
-        onOpenChange={(open) => !open && setSelectedEvent(null)} 
+
+      <ActivityDetailsDrawer
+        event={selectedEvent}
+        open={!!selectedEvent}
+        onOpenChange={(open) => !open && setSelectedEvent(null)}
       />
     </AppShell>
   );

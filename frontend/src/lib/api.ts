@@ -1,5 +1,12 @@
-import { AuthStorage } from './AuthStorage';
-import { ANIMALS, DAILY_TREND, WEEKLY_ACTIVITY, MONTHLY_ACTIVITY, RECENT_ALERTS, PEAK_HOURS } from './agrishield-data';
+import { AuthStorage } from "./AuthStorage";
+import {
+  ANIMALS,
+  DAILY_TREND,
+  WEEKLY_ACTIVITY,
+  MONTHLY_ACTIVITY,
+  RECENT_ALERTS,
+  PEAK_HOURS,
+} from "./agrishield-data";
 
 let envApiUrl = import.meta.env['VITE_API_URL'];
 if (envApiUrl && envApiUrl.includes('localhost') && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -12,11 +19,11 @@ export class ApiClient {
     const token = AuthStorage.getToken();
     const headers = new Headers(options.headers || {});
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
 
-    if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
-      headers.set('Content-Type', 'application/json');
+    if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+      headers.set("Content-Type", "application/json");
     }
 
     try {
@@ -37,7 +44,7 @@ export class ApiClient {
         }
         throw new Error(errorMessage);
       }
-      
+
       const data = await response.json();
       return data.data !== undefined ? data.data : data;
     } catch (err) {
@@ -52,14 +59,26 @@ export class ApiClient {
       
 
 
-      if (endpoint.includes('/auth/me')) {
+      if (endpoint.includes("/auth/me")) {
         return { id: "test-user", name: "Guest User" } as any;
       }
 
-      if (endpoint.includes('/community')) {
+      if (endpoint.includes("/community")) {
         return [
-          { id: '1', user: 'Farmer John', message: 'Wild boars spotted near north fence.', time: '2h ago', likes: 12 },
-          { id: '2', user: 'AgriTech Admin', message: 'System update scheduled for tonight.', time: '5h ago', likes: 45 }
+          {
+            id: "1",
+            user: "Farmer John",
+            message: "Wild boars spotted near north fence.",
+            time: "2h ago",
+            likes: 12,
+          },
+          {
+            id: "2",
+            user: "AgriTech Admin",
+            message: "System update scheduled for tonight.",
+            time: "5h ago",
+            likes: 45,
+          },
         ] as any;
       }
 
@@ -69,12 +88,12 @@ export class ApiClient {
   }
 
   static async get<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'GET' });
+    return this.fetch<T>(endpoint, { method: "GET" });
   }
 
   static async post<T>(endpoint: string, body: any): Promise<T> {
     return this.fetch<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: body instanceof FormData ? body : JSON.stringify(body),
     });
   }

@@ -1,6 +1,10 @@
-import { ApiClient } from '../lib/api';
+import { ApiClient } from "../lib/api";
 
 export class AuthService {
+  static get useMocks() {
+    return import.meta.env.VITE_USE_MOCKS === "true";
+  }
+
   static async login(credentials: { email?: string; mobile?: string; password: string }) {
     return ApiClient.post<{ user: any; token: string }>('/auth/login', credentials);
   }
