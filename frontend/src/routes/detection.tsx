@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BellRing, FileVideo, ImageUp, Loader2, Radar, Volume2, Zap, Play, UploadCloud,
   AlertTriangle, Camera, ShieldCheck, Download, Printer, Share2, MoreVertical,
-  CheckCircle2, Clock, MapPin, Activity, Radio, VolumeX, Pause, RefreshCw, Send, Focus, ArrowRight
+  CheckCircle2, Clock, MapPin, Activity, Radio, VolumeX, Pause, RefreshCw, Send, Focus, ArrowRight, Map
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -382,6 +382,15 @@ function DetectionPage() {
                            Village
                         </Button>
                       </div>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <Button variant="default" className="w-full justify-center rounded-xl font-bold bg-primary text-white hover:bg-primary/90 h-12 transition-all shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500" asChild>
+                        <Link to="/heatmap" search={{ intrusion: result.side }}>
+                           <Map className="mr-2 size-4" />
+                           View Heat Map
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 ) : (

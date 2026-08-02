@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DetectionRouteImport } from './routes/detection'
+import { Route as FarmSetupRouteImport } from './routes/farm-setup'
 import { Route as HeatmapRouteImport } from './routes/heatmap'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -50,6 +51,11 @@ const DetectionRoute = DetectionRouteImport.update({
   path: '/detection',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmSetupRoute = FarmSetupRouteImport.update({
+  id: '/farm-setup',
+  path: '/farm-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HeatmapRoute = HeatmapRouteImport.update({
   id: '/heatmap',
   path: '/heatmap',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
+  '/farm-setup': typeof FarmSetupRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
+  '/farm-setup': typeof FarmSetupRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
   '/detection': typeof DetectionRoute
+  '/farm-setup': typeof FarmSetupRoute
   '/heatmap': typeof HeatmapRoute
   '/history': typeof HistoryRoute
   '/profile': typeof ProfileRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
+    | '/farm-setup'
     | '/heatmap'
     | '/history'
     | '/profile'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
+    | '/farm-setup'
     | '/heatmap'
     | '/history'
     | '/profile'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/dashboard'
     | '/detection'
+    | '/farm-setup'
     | '/heatmap'
     | '/history'
     | '/profile'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
   DetectionRoute: typeof DetectionRoute
+  FarmSetupRoute: typeof FarmSetupRoute
   HeatmapRoute: typeof HeatmapRoute
   HistoryRoute: typeof HistoryRoute
   ProfileRoute: typeof ProfileRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DetectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farm-setup': {
+      id: '/farm-setup'
+      path: '/farm-setup'
+      fullPath: '/farm-setup'
+      preLoaderRoute: typeof FarmSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/heatmap': {
       id: '/heatmap'
       path: '/heatmap'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
   DetectionRoute: DetectionRoute,
+  FarmSetupRoute: FarmSetupRoute,
   HeatmapRoute: HeatmapRoute,
   HistoryRoute: HistoryRoute,
   ProfileRoute: ProfileRoute,
