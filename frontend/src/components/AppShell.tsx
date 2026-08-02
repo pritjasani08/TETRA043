@@ -176,7 +176,7 @@ export function AppShell({ title, subtitle, children, actions }: AppShellProps) 
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Seamless Header */}
-        <header className="sticky top-4 z-40 mx-4 md:mx-10 mb-6 flex flex-wrap items-center gap-4 bg-white/10 px-6 py-4 backdrop-blur-[32px] border border-white/40 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
+        <header className="relative z-40 mx-4 md:mx-10 mt-4 mb-6 flex flex-wrap items-center gap-4 bg-white/60 px-6 py-4 backdrop-blur-[32px] border border-white/40 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)] rounded-[2rem]">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button

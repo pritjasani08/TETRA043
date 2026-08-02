@@ -71,7 +71,9 @@ function Dashboard() {
   const todayTotal = data.distribution.reduce((s: number, a: { value: number }) => s + a.value, 0); // Approx
   const weekTotal =
     data.distribution.reduce((s: number, a: { value: number }) => s + a.value, 0) * 4; // Approx
-  const distribution = data.distribution;
+  const distribution = data.distribution
+    .filter((a: any) => !["ELEPHANT"].includes(a.name.toUpperCase()))
+    .slice(0, 4);
   const DAILY_TREND = data.dailyTrend;
   const WEEKLY_ACTIVITY = data.weeklyActivity;
   const MONTHLY_ACTIVITY = data.monthlyActivity;
@@ -106,7 +108,7 @@ function Dashboard() {
         day: "numeric",
       })}
     >
-      <div className="mx-auto max-w-[1200px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="mx-auto max-w-[1200px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
         {/* HERO SECTION (Layer 1 - Critical) */}
         <section className="flex flex-col xl:flex-row gap-6">
           {/* Main Status Hero */}
@@ -185,320 +187,241 @@ function Dashboard() {
           </div>
         </section>
 
-        <div className="grid gap-8 xl:grid-cols-[1.5fr_1fr]">
-          {/* LEFT COLUMN - Primary Monitoring */}
-          <div className="space-y-8">
-            {/* Cinematic Live Camera Preview */}
-            <PanelSection
-              title="Perimeter Vision"
-              right={
-                <Badge
-                  variant="outline"
-                  className="gap-2 border-primary/20 bg-primary/5 text-primary rounded-full px-3 py-1 font-bold"
-                >
-                  <span className="size-2 rounded-full bg-primary animate-pulse" /> Live Analysis
-                </Badge>
-              }
-            >
-              <div className="group relative overflow-hidden rounded-[2rem] border border-border shadow-2xl shadow-black/5 bg-black mt-2">
-                <div className="aspect-[21/9] w-full overflow-hidden relative">
-                  <img
-                    src="/agrishield_boar.png"
-                    alt="Farm Feed"
-                    className="w-full h-full object-cover opacity-90 transition-transform duration-[10s] ease-out group-hover:scale-105"
-                  />
-
-                  {/* Subtle Gradient Overlay for legibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
-
-                  {/* Premium Glass HUD */}
-                  <div className="absolute top-6 left-6">
-                    <div className="backdrop-blur-xl bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-white shadow-lg">
-                      <p className="text-xs font-bold tracking-wider opacity-80">NORTH BOUNDARY</p>
-                      <p className="font-display text-lg font-bold">CAM-01 Edge</p>
-                    </div>
+        <div className="grid gap-8 xl:grid-cols-[1.5fr_1fr] items-stretch">
+          {/* ROW 1 */}
+          {/* Perimeter Vision */}
+          <PanelSection
+            title="Perimeter Vision"
+            className="h-full flex flex-col"
+            right={
+              <Badge
+                variant="outline"
+                className="gap-2 border-primary/20 bg-primary/5 text-primary rounded-full px-3 py-1 font-bold"
+              >
+                <span className="size-2 rounded-full bg-primary animate-pulse" /> Live Analysis
+              </Badge>
+            }
+          >
+            <div className="group relative overflow-hidden rounded-[2rem] border border-border shadow-2xl shadow-black/5 bg-black mt-2 flex-1 min-h-[240px]">
+              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                <img
+                  src="/agrishield_boar.png"
+                  alt="Farm Feed"
+                  className="w-full h-full object-cover opacity-90 transition-transform duration-[10s] ease-out group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
+                <div className="absolute top-6 left-6">
+                  <div className="backdrop-blur-xl bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-white shadow-lg">
+                    <p className="text-xs font-bold tracking-wider opacity-80">NORTH BOUNDARY</p>
+                    <p className="font-display text-lg font-bold">CAM-01 Edge</p>
                   </div>
-
-                  {systemOn && (
-                    <div className="absolute bottom-6 left-6">
-                      <div className="backdrop-blur-xl bg-primary/20 px-4 py-2 rounded-2xl border border-primary/30 text-white flex items-center gap-3 shadow-lg">
-                        <ShieldCheck className="size-5" />
-                        <div>
-                          <p className="text-xs font-bold tracking-wider opacity-80">AI ENGINE</p>
-                          <p className="font-semibold text-sm">Actively Scanning • 99% Conf</p>
-                        </div>
+                </div>
+                {systemOn && (
+                  <div className="absolute bottom-6 left-6">
+                    <div className="backdrop-blur-xl bg-primary/20 px-4 py-2 rounded-2xl border border-primary/30 text-white flex items-center gap-3 shadow-lg">
+                      <ShieldCheck className="size-5" />
+                      <div>
+                        <p className="text-xs font-bold tracking-wider opacity-80">AI ENGINE</p>
+                        <p className="font-semibold text-sm">Actively Scanning • 99% Conf</p>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </PanelSection>
+
+          {/* Premium Activity Trend */}
+          <PanelSection
+            title="Weekly Trend"
+            className="h-full flex flex-col"
+            right={
+              <Link to="/analytics" className="text-xs font-bold text-primary hover:underline">
+                View All
+              </Link>
+            }
+          >
+            <div className="flex-1 mt-2 min-h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={DAILY_TREND}>
+                  <defs>
+                    <linearGradient id="colorIntrusions" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "16px",
+                      border: "none",
+                      boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
+                      fontWeight: 600,
+                      padding: "12px 16px",
+                    }}
+                    itemStyle={{ color: "var(--primary)" }}
+                  />
+                  <Area
+                    type="monotoneX"
+                    dataKey="intrusions"
+                    stroke="var(--primary)"
+                    strokeWidth={4}
+                    fillOpacity={1}
+                    fill="url(#colorIntrusions)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </PanelSection>
+
+          {/* ROW 2 */}
+          {/* Smart Assistant Recommendations */}
+          <div className="panel h-full p-6 sm:p-8 border-l-4 border-l-primary bg-gradient-to-r from-primary/5 to-transparent relative overflow-hidden flex flex-col justify-center">
+            <div className="flex gap-5 relative z-10">
+              <div className="shrink-0 mt-1">
+                <div className="p-3 bg-white rounded-full shadow-sm border border-border text-primary">
+                  <Lightbulb className="size-6" />
                 </div>
               </div>
-            </PanelSection>
-
-            {/* Smart Assistant Recommendations */}
-            <div className="panel p-6 sm:p-8 border-l-4 border-l-primary bg-gradient-to-r from-primary/5 to-transparent relative overflow-hidden">
-              <div className="flex gap-5 relative z-10">
-                <div className="shrink-0 mt-1">
-                  <div className="p-3 bg-white rounded-full shadow-sm border border-border text-primary">
-                    <Lightbulb className="size-6" />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h3 className="font-display text-lg font-bold text-foreground">
-                    AI Farming Assistant
-                  </h3>
-                  <p className="text-muted-foreground font-medium text-sm leading-relaxed max-w-2xl">
-                    Based on regional data, wild boar activity peaks between 8 PM and 11 PM tonight.
-                    I recommend verifying that the deterrent sirens on the North and West boundaries
-                    are fully operational before dusk.
-                  </p>
-                  <Button
-                    variant="link"
-                    className="px-0 h-auto text-primary font-bold hover:no-underline hover:opacity-80"
-                  >
-                    Verify Deterrent Settings <ArrowRight className="ml-1.5 size-4" />
-                  </Button>
-                </div>
+              <div className="space-y-3">
+                <h3 className="font-display text-lg font-bold text-foreground">
+                  AI Farming Assistant
+                </h3>
+                <p className="text-muted-foreground font-medium text-sm leading-relaxed max-w-2xl">
+                  Based on regional data, wild boar activity peaks between 8 PM and 11 PM tonight. I
+                  recommend verifying that the deterrent sirens on the North and West boundaries are
+                  fully operational before dusk.
+                </p>
+                <Button
+                  variant="link"
+                  className="px-0 h-auto text-primary font-bold hover:no-underline hover:opacity-80"
+                >
+                  Verify Deterrent Settings <ArrowRight className="ml-1.5 size-4" />
+                </Button>
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN - Context & Data (Layer 2 & 3) */}
-          <div className="space-y-8">
-            {/* Friendly Recent Alert */}
-            <PanelSection title="Recent Activity">
-              {latestAlert ? (
-                <div className="group rounded-3xl border border-border bg-white p-5 hover:border-warning/30 transition-colors shadow-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1 rounded-2xl bg-warning/15 p-3 text-warning">
-                      <Bell className="size-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                        A{" "}
-                        <strong className="text-foreground font-bold">{latestAlert.animal}</strong>{" "}
-                        was safely deterred near the{" "}
-                        <strong className="text-foreground font-bold">
-                          {latestAlert.side} fence
-                        </strong>{" "}
-                        at {latestAlert.time}.
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-4 h-9 text-xs font-bold rounded-xl w-full group-hover:bg-warning/5 group-hover:text-warning group-hover:border-warning/20 transition-all"
-                      >
-                        Review Event Recording
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-muted-foreground font-medium text-sm bg-surface-2 rounded-3xl">
-                  No recent alerts.
-                </div>
-              )}
-            </PanelSection>
-
-            {/* Premium Activity Trend */}
-            <PanelSection
-              title="Weekly Trend"
-              right={
-                <Link to="/analytics" className="text-xs font-bold text-primary hover:underline">
-                  View All
-                </Link>
-              }
-            >
-              <div className="h-48 mt-2">
+          {/* Elegant Distribution Donut */}
+          <PanelSection title="Animal Distribution" className="h-full flex flex-col">
+            <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-6 mt-2">
+              <div className="h-32 w-32 shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={DAILY_TREND}>
-                    <defs>
-                      <linearGradient id="colorIntrusions" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
+                  <PieChart>
+                    <Pie
+                      data={distribution}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={36}
+                      outerRadius={52}
+                      paddingAngle={6}
+                      cornerRadius={8}
+                      stroke="none"
+                    >
+                      {distribution.map((_: any, i: number) => (
+                        <Cell
+                          key={i}
+                          fill={
+                            i === 0
+                              ? "var(--warning)"
+                              : i === 1
+                                ? "var(--primary)"
+                                : "var(--accent)"
+                          }
+                        />
+                      ))}
+                    </Pie>
                     <Tooltip
                       contentStyle={{
-                        borderRadius: "16px",
+                        borderRadius: "12px",
                         border: "none",
-                        boxShadow: "0 20px 40px -10px rgba(0,0,0,0.1)",
-                        fontWeight: 600,
-                        padding: "12px 16px",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
                       }}
-                      itemStyle={{ color: "var(--primary)" }}
                     />
-                    <Area
-                      type="monotoneX"
-                      dataKey="intrusions"
-                      stroke="var(--primary)"
-                      strokeWidth={4}
-                      fillOpacity={1}
-                      fill="url(#colorIntrusions)"
-                    />
-                  </AreaChart>
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
-            </PanelSection>
-
-            {/* Elegant Distribution Donut */}
-            <PanelSection title="Animal Distribution">
-              <div className="flex items-center gap-6 mt-2">
-                <div className="h-32 w-32 shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={distribution}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={36}
-                        outerRadius={52}
-                        paddingAngle={6}
-                        cornerRadius={8}
-                        stroke="none"
-                      >
-                        {distribution.map((_: any, i: number) => (
-                          <Cell
-                            key={i}
-                            fill={
-                              i === 0
-                                ? "var(--warning)"
-                                : i === 1
-                                  ? "var(--primary)"
-                                  : "var(--accent)"
-                            }
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "none",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Recent Activity</h3>
-                  <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
-                    {latestAlert.description} ({latestAlert.time})
-                  </p>
-                  <div className="mt-3 flex items-center gap-3">
-                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-full">
-                      View Recording
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </PanelSection>
-
-            {/* Recommendations / Assistant */}
-            <PanelSection title="Smart Recommendations" className="bg-primary/5 border-primary/10">
-              <div className="flex gap-4">
-                <div className="shrink-0 mt-1">
-                  <Lightbulb className="size-5 text-primary" />
-                </div>
-                <div className="space-y-3 text-sm">
-                  <p className="text-foreground">
-                    Based on regional activity, wild boars are highly active between 8 PM and 11 PM.
-                  </p>
-                  <p className="text-muted-foreground">
-                    We recommend verifying your deterrent systems are fully operational on the North
-                    and West boundaries before dusk.
-                  </p>
-                  <Button variant="link" className="px-0 h-auto text-primary font-semibold">
-                    Review Deterrent Settings <ArrowRight className="ml-1 size-3" />
+              <div>
+                <h3 className="font-semibold text-sm">Top Species</h3>
+                <p className="text-sm mt-1 text-muted-foreground leading-relaxed">
+                  Most of the recent activity has been associated with{" "}
+                  {distribution[0]?.name || "Boars"}.
+                </p>
+                <div className="mt-3 flex items-center gap-3">
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-full" asChild>
+                    <Link to="/analytics">View Analytics</Link>
                   </Button>
                 </div>
               </div>
-            </PanelSection>
+            </div>
+          </PanelSection>
 
-            <PanelSection
-              title="Detection overview"
-              description="Today and weekly counts per agricultural species"
-            >
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {distribution.map((a: any) => (
-                  <div
-                    key={a.name}
-                    className="rounded-xl border border-border bg-surface/60 p-3.5 transition-all hover:border-primary/40 hover:bg-surface/80"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 font-medium text-sm">{a.name}</span>
-                      <RiskPill level="medium" />
-                    </div>
-                    <div className="mt-3.5 flex items-end gap-5">
-                      <span>
-                        <span className="block font-display text-xl font-bold">
-                          {Math.floor(a.value / 4)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                          today
-                        </span>
-                      </span>
-                      <span>
-                        <span className="block font-display text-xl font-bold text-muted-foreground">
-                          {a.value}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                          this week
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PanelSection>
-          </div>
-        </div>
-
-        {/* Right Side: System Logs & Recent Alerts */}
-        <div className="flex flex-col gap-6">
-          <PanelSection title="Edge Hardware Health" description="Integrated IoT protection stats">
-            <div className="relative overflow-hidden rounded-xl border border-border bg-background/55 p-4">
-              <ul className="relative space-y-3.5 text-xs">
-                {[
-                  ["System status", systemOn ? "🟢 Active & Guarding" : "🔴 Paused / Disabled"],
-                  ["Camera connection", "Connected · CAM-01 North"],
-                  ["Local detection engine", systemOn ? "Running · 24 fps" : "Idle (Switch off)"],
-                  ["Active deterrent hardware", systemOn ? "Ready · Strobe Horn Node" : "Disabled"],
-                  ["Last sync time", "2 seconds ago"],
-                ].map(([k, v]) => (
-                  <li
-                    key={k}
-                    className="flex items-center justify-between gap-3 pb-2 border-b border-border/40 last:pb-0 last:border-b-0"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Camera className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      <span className="text-xs font-medium">{k}</span>
+          {/* ROW 3 */}
+          {/* Detection overview */}
+          <PanelSection
+            title="Detection overview"
+            description="Today and weekly counts per agricultural species"
+            className="h-full flex flex-col"
+          >
+            <div className="grid gap-4 sm:grid-cols-2 flex-1">
+              {distribution.map((a: any) => (
+                <div
+                  key={a.name}
+                  className="rounded-xl border border-border bg-surface/60 p-4 transition-all hover:border-primary/40 hover:bg-surface/80 flex flex-col justify-between h-full"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <span className="flex items-center gap-2 font-medium text-sm truncate">
+                      {a.name}
                     </span>
-                    <span className="text-xs">{v}</span>
-                  </li>
-                ))}
-              </ul>
+                    <RiskPill level="medium" />
+                  </div>
+                  <div className="mt-4 flex items-end gap-5">
+                    <span>
+                      <span className="block font-display text-xl font-bold">
+                        {Math.floor(a.value / 4)}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        today
+                      </span>
+                    </span>
+                    <span>
+                      <span className="block font-display text-xl font-bold text-muted-foreground">
+                        {a.value}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        this week
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </PanelSection>
 
           <PanelSection
             title="Recent alerts"
-            description="Latest five detections across Gujarat zones"
+            description="Latest detections across all zones"
+            className="h-full flex flex-col"
             right={
               <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
                 <Link to="/history">View all</Link>
               </Button>
             }
           >
-            <ul className="divide-y divide-border">
-              {RECENT_ALERTS.map((d: any) => (
+            <ul className="flex-1 divide-y divide-border panel px-4 bg-white/50 flex flex-col">
+              {RECENT_ALERTS.slice(0, 3).map((d: any) => (
                 <li key={d.id} className="flex items-center justify-between gap-3 py-3 text-xs">
-                  <span className="min-w-0">
-                    <span className="block truncate font-semibold text-foreground">
-                      {d.description || d.message || d.animal}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {d.time || d.timestamp}
-                    </span>
+                  <span className="min-w-0 flex items-center gap-3">
+                    <div className="mt-0.5 rounded-full bg-warning/15 p-2 text-warning shrink-0">
+                      <Bell className="size-3" />
+                    </div>
+                    <div>
+                      <span className="block truncate font-semibold text-foreground">
+                        {d.description || d.message || d.animal}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {d.time || d.timestamp}
+                      </span>
+                    </div>
                   </span>
                   <Badge
                     variant="outline"
@@ -512,56 +435,54 @@ function Dashboard() {
                   </Badge>
                 </li>
               ))}
+              {(!RECENT_ALERTS || RECENT_ALERTS.length === 0) && (
+                <li className="py-4 text-center text-muted-foreground text-sm">
+                  No recent alerts.
+                </li>
+              )}
             </ul>
           </PanelSection>
         </div>
-      </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <PanelSection title="Daily detection trend" description="Intrusions per day this week">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={DAILY_TREND}>
-                <defs>
-                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.55} />
-                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  itemStyle={{ color: "var(--popover-foreground)" }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="intrusions"
-                  stroke="var(--chart-1)"
-                  strokeWidth={2}
-                  fill="url(#g1)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </PanelSection>
-
-        <PanelSection title="Weekly activity" description="Intrusions vs successfully deterred">
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={WEEKLY_ACTIVITY}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  itemStyle={{ color: "var(--popover-foreground)" }}
-                  labelStyle={{ color: "var(--popover-foreground)" }}
-                />
-                <Bar dataKey="intrusions" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="deterred" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Edge Hardware Health (Horizontal at bottom) */}
+        {/* Edge Hardware Health (Horizontal at bottom) */}
+        <PanelSection title="Edge Hardware Health" className="mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+            {[
+              {
+                label: "System status",
+                value: systemOn ? "🟢 Active & Guarding" : "🔴 Paused",
+                icon: ShieldCheck,
+              },
+              { label: "Camera connection", value: "Connected · CAM-01", icon: Camera },
+              {
+                label: "Local detection",
+                value: systemOn ? "Running · 24 fps" : "Idle",
+                icon: Activity,
+              },
+              {
+                label: "Active deterrent",
+                value: systemOn ? "Ready · Horn Node" : "Disabled",
+                icon: Bell,
+              },
+              { label: "Last sync time", value: "2 seconds ago", icon: History },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={i}
+                  className="rounded-xl border border-border bg-white p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full justify-between"
+                >
+                  <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                    <Icon className="size-4" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                      {item.label}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-foreground">{item.value}</span>
+                </div>
+              );
+            })}
           </div>
         </PanelSection>
       </div>

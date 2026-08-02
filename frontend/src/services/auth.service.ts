@@ -52,6 +52,6 @@ export class AuthService {
         setTimeout(() => resolve({ success: true }), 300);
       });
     }
-    return ApiClient.post<{ success: boolean }>("/auth/logout");
+    return ApiClient.post<{ success: boolean }>("/auth/logout", {});
   }
 }
