@@ -1,5 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowDownRight, MapPinned, Radio, Send, Timer, Users, Megaphone, BellRing, MapPin, ShieldAlert } from "lucide-react";
+import {
+  ArrowDownRight,
+  MapPinned,
+  Radio,
+  Send,
+  Timer,
+  Users,
+  Megaphone,
+  BellRing,
+  MapPin,
+  ShieldAlert,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -15,9 +26,7 @@ import { animalByName } from "@/lib/agrishield-data";
 
 export const Route = createFileRoute("/community")({
   head: () => ({
-    meta: [
-      { title: "Village Safety Network — AgriShield AI" },
-    ],
+    meta: [{ title: "Village Safety Network — AgriShield AI" }],
   }),
   component: () => (
     <AuthGuard>
@@ -79,9 +88,12 @@ function CommunityPage() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-          
           {/* Main Feed */}
-          <PanelSection title="Live Community Feed" description="Real-time reports from neighbouring farms" className="p-4 sm:p-6 bg-transparent border-none shadow-none">
+          <PanelSection
+            title="Live Community Feed"
+            description="Real-time reports from neighbouring farms"
+            className="p-4 sm:p-6 bg-transparent border-none shadow-none"
+          >
             <ul className="space-y-4">
               {postsLoading ? (
                 <div className="p-8 text-center text-muted-foreground animate-pulse">Loading community alerts...</div>
@@ -90,14 +102,16 @@ function CommunityPage() {
               ) : posts.slice(0, visibleCount).map((p: any) => {
                 const a = animalByName(p.animal || "Unknown");
                 return (
-                  <li key={p.id} className="rounded-[2rem] border border-border bg-white p-5 sm:p-7 shadow-sm hover:shadow-md transition-shadow group">
+                  <li
+                    key={p.id}
+                    className="rounded-[2rem] border border-border bg-white p-5 sm:p-7 shadow-sm hover:shadow-md transition-shadow group"
+                  >
                     <div className="flex flex-col sm:flex-row gap-5">
-                      
                       {/* Avatar / Icon */}
                       <div className="flex-shrink-0 size-16 rounded-[1.5rem] bg-surface flex items-center justify-center text-4xl shadow-inner border border-border/50 group-hover:scale-105 transition-transform">
                         {a.emoji}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
@@ -113,7 +127,7 @@ function CommunityPage() {
                             {new Date(p.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
-                        
+
                         <div className="mt-4 p-4 bg-surface/50 rounded-2xl border border-border border-dashed flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div>
                             <span className="font-bold text-foreground block mb-1 text-base">{p.animal || 'Animal'} Detected</span>
@@ -121,8 +135,11 @@ function CommunityPage() {
                               Moving {p.direction?.toLowerCase() || 'nearby'} · {p.distance || 'Unknown distance'} away
                             </span>
                           </div>
-                           <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-                            <Badge variant="secondary" className="gap-1.5 rounded-full px-3 py-1 bg-white">
+                          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                            <Badge
+                              variant="secondary"
+                              className="gap-1.5 rounded-full px-3 py-1 bg-white"
+                            >
                               <ArrowDownRight className="size-3.5 text-primary" />
                               Alert Broadcasted
                             </Badge>
@@ -134,9 +151,9 @@ function CommunityPage() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="mt-4 flex justify-end">
-                           <Button
+                          <Button
                             size="sm"
                             variant="outline"
                             className="rounded-xl font-bold hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
@@ -150,7 +167,6 @@ function CommunityPage() {
                           </Button>
                         </div>
                       </div>
-
                     </div>
                   </li>
                 );
@@ -183,7 +199,7 @@ function CommunityPage() {
                     className="rounded-[1.5rem] border border-destructive/20 bg-destructive/5 p-5 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-destructive/10 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
-                    
+
                     <div className="flex justify-between items-start mb-3 relative z-10">
                       <p className="flex items-center gap-2 font-display text-xl font-bold text-foreground tracking-tight">
                         {animalByName(p.animal).emoji} {p.animal}
@@ -195,10 +211,10 @@ function CommunityPage() {
                         <MapPin className="size-3.5" /> {p.distance}
                       </span>
                       <span className="flex items-center gap-1.5 bg-white/60 px-2.5 py-1 rounded-lg border border-border/50">
-                         <Timer className="size-3.5" /> {p.eta}
+                        <Timer className="size-3.5" /> {p.eta}
                       </span>
                     </div>
-                    
+
                     <Button
                       size="sm"
                       className="w-full rounded-xl font-bold shadow-md hover:-translate-y-0.5 transition-transform relative z-10"
@@ -216,7 +232,11 @@ function CommunityPage() {
               </ul>
             </PanelSection>
 
-            <PanelSection title="Relay Chain Mechanics" description="How AgriShield protects the cluster" className="p-6 md:p-8 flex-1">
+            <PanelSection
+              title="Relay Chain Mechanics"
+              description="How AgriShield protects the cluster"
+              className="p-6 md:p-8 flex-1"
+            >
               <div className="mt-4">
                 <ol className="relative border-l-2 border-primary/20 ml-3 space-y-6">
                   {[
@@ -226,11 +246,15 @@ function CommunityPage() {
                     ["Deterrents auto-activated", "8:11 PM · Siren + Flash Lights"],
                   ].map(([t, s], i) => (
                     <li key={t} className="pl-6 relative">
-                      <span className={cn(
-                        "absolute -left-[9px] top-1 rounded-full ring-4 ring-white flex items-center justify-center size-4",
-                        i === 3 ? "bg-primary" : "bg-primary/40"
-                      )}>
-                        {i === 3 && <div className="size-1.5 bg-white rounded-full animate-pulse" />}
+                      <span
+                        className={cn(
+                          "absolute -left-[9px] top-1 rounded-full ring-4 ring-white flex items-center justify-center size-4",
+                          i === 3 ? "bg-primary" : "bg-primary/40",
+                        )}
+                      >
+                        {i === 3 && (
+                          <div className="size-1.5 bg-white rounded-full animate-pulse" />
+                        )}
                       </span>
                       <p className="font-bold text-sm text-foreground">{t}</p>
                       <p className="text-xs font-medium text-muted-foreground mt-0.5">{s}</p>
@@ -244,7 +268,7 @@ function CommunityPage() {
                 </ol>
               </div>
               <div className="mt-6 pt-4 border-t border-border flex items-center gap-2 text-xs font-bold text-muted-foreground bg-surface/50 p-3 rounded-xl">
-                <MapPinned className="size-4 text-primary" /> 
+                <MapPinned className="size-4 text-primary" />
                 Cluster Radius: 5 km · {profile.village}, {profile.district}
               </div>
             </PanelSection>

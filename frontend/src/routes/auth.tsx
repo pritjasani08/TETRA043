@@ -37,6 +37,51 @@ function AuthPage() {
     remember: true
   });
 
+  const [formData, setFormData] = useState({
+    mobile: "98250 41122",
+    password: "demo",
+    remember: true,
+  });
+
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    if (/[^\d\s]/.test(val)) {
+      toast.error("Invalid Input", { description: "Only numbers are allowed for mobile number." });
+      return;
+    }
+
+    const rawDigits = val.replace(/\D/g, "");
+    if (rawDigits.length > 10) {
+      toast.error("Limit Exceeded", { description: "Mobile number cannot exceed 10 digits." });
+      return;
+    }
+
+    setFormData({ ...formData, mobile: val });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const rawDigits = formData.mobile.replace(/\D/g, "");
+    if (rawDigits.length !== 10) {
+      toast.error("Invalid Mobile Number", { description: "Please enter exactly 10 digits." });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await login({ email: "demo@agrishield.in", password: "demo1234" });
+      toast.success("Welcome back", { description: "Monitoring console unlocked." });
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error("Login Failed", { description: err.message || "Invalid credentials" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (ready && isAuthed) {
       if (user?.email === "alert@gmail.com") {
@@ -85,7 +130,6 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row bg-[#07111F] text-white overflow-hidden relative selection:bg-[#A3E635]/30">
-
       {/* Global Background Elements */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-[#A3E635]/5 rounded-full blur-[120px] lg:hidden" />
@@ -101,13 +145,13 @@ function AuthPage() {
             }}
             animate={{
               opacity: [0, 0.7, 0],
-              y: [0, -30, 0]
+              y: [0, -30, 0],
             }}
             transition={{
               duration: 3 + Math.random() * 3,
               repeat: Infinity,
               delay: Math.random() * 4,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -134,7 +178,8 @@ function AuthPage() {
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
             className="font-display text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.15] tracking-tight mb-8"
           >
-            Protect every harvest.<br />
+            Protect every harvest.
+            <br />
             <span className="text-white/40 font-light">Before wildlife reaches it.</span>
           </motion.h1>
 
@@ -145,9 +190,12 @@ function AuthPage() {
             className="text-lg lg:text-xl text-white/70 leading-relaxed font-light space-y-6"
           >
             <p>
-              Real-time AI detects wild animals,<br />
-              sends instant Gujarati voice alerts,<br />
-              and helps protect your crops<br />
+              Real-time AI detects wild animals,
+              <br />
+              sends instant Gujarati voice alerts,
+              <br />
+              and helps protect your crops
+              <br />
               before damage occurs.
             </p>
             <div className="w-16 h-[1px] bg-white/20" />
@@ -241,7 +289,10 @@ function AuthPage() {
 
             <div className="space-y-2.5 group">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-widest text-white/40 group-focus-within:text-[#A3E635] transition-colors duration-300">
+                <Label
+                  htmlFor="password"
+                  className="text-[11px] font-semibold uppercase tracking-widest text-white/40 group-focus-within:text-[#A3E635] transition-colors duration-300"
+                >
                   Password
                 </Label>
                 {!isRegister && (
@@ -277,13 +328,20 @@ function AuthPage() {
                 onCheckedChange={(c) => setFormData({ ...formData, remember: c as boolean })}
                 className="rounded-[4px] border-white/20 data-[state=checked]:bg-[#A3E635] data-[state=checked]:border-[#A3E635] data-[state=checked]:text-[#07111F] transition-all duration-300"
               />
-              <Label htmlFor="remember" className="text-sm font-medium leading-none text-white/60 hover:text-white transition-colors cursor-pointer">
+              <Label
+                htmlFor="remember"
+                className="text-sm font-medium leading-none text-white/60 hover:text-white transition-colors cursor-pointer"
+              >
                 Remember me
               </Label>
             </div>
 
             <div className="space-y-4 pt-2">
-              <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.25, ease: "easeOut" }}>
+              <motion.div
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
                 <Button
                   type="submit"
                   disabled={loading}
@@ -334,7 +392,6 @@ function AuthPage() {
           </div>
         </motion.div>
       </div>
-
     </div>
   );
 }

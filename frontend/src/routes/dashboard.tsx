@@ -68,9 +68,12 @@ function Dashboard() {
     );
   }
 
-  const todayTotal = data.distribution.reduce((s, a) => s + a.value, 0); // Approx
-  const weekTotal = data.distribution.reduce((s, a) => s + a.value, 0) * 4; // Approx
-  const distribution = data.distribution;
+  const todayTotal = data.distribution.reduce((s: number, a: { value: number }) => s + a.value, 0); // Approx
+  const weekTotal =
+    data.distribution.reduce((s: number, a: { value: number }) => s + a.value, 0) * 4; // Approx
+  const distribution = data.distribution
+    .filter((a: any) => !["ELEPHANT"].includes(a.name.toUpperCase()))
+    .slice(0, 4);
   const DAILY_TREND = data.dailyTrend;
   const WEEKLY_ACTIVITY = data.weeklyActivity;
   const MONTHLY_ACTIVITY = data.monthlyActivity;
@@ -82,18 +85,28 @@ function Dashboard() {
     { hour: "18", count: 17 },
     { hour: "20", count: 26 },
   ];
-  
+
   const latestAlert = RECENT_ALERTS?.[0];
   const statusBg = systemOn ? "bg-primary/15" : "bg-destructive/15";
-  const statusIcon = systemOn ? <ShieldCheck className="size-6 text-primary" /> : <AlertTriangle className="size-6 text-destructive" />;
+  const statusIcon = systemOn ? (
+    <ShieldCheck className="size-6 text-primary" />
+  ) : (
+    <AlertTriangle className="size-6 text-destructive" />
+  );
   const statusTitle = systemOn ? "System Armed" : "System Offline";
-  const statusDesc = systemOn ? "All cameras are active and AI is monitoring the perimeter." : "Monitoring is paused. AI detections are currently disabled.";
+  const statusDesc = systemOn
+    ? "All cameras are active and AI is monitoring the perimeter."
+    : "Monitoring is paused. AI detections are currently disabled.";
   const statusColor = systemOn ? "text-primary" : "text-destructive";
 
   return (
     <AppShell
-      title={`Good Evening, ${profile.fullName.split(' ')[0]}`}
-      subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+      title={`Good Evening, ${profile.fullName.split(" ")[0]}`}
+      subtitle={new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      })}
     >
       <div className="mx-auto max-w-[1200px] space-y-8 pb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
         
@@ -103,20 +116,26 @@ function Dashboard() {
           <div className="panel flex-[2] p-8 md:p-10 flex flex-col justify-between relative overflow-hidden bg-white">
             {/* Soft background glow */}
             <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="flex items-start justify-between relative z-10">
               <div className="flex items-center gap-6">
-                <div className={`p-4 rounded-3xl ${statusBg} shadow-lg shadow-${statusBg}/30 transition-transform hover:scale-105 duration-300`}>
+                <div
+                  className={`p-4 rounded-3xl ${statusBg} shadow-lg shadow-${statusBg}/30 transition-transform hover:scale-105 duration-300`}
+                >
                   {statusIcon}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Farm Status</p>
-                  <h2 className={`font-display text-4xl md:text-5xl font-bold tracking-tight ${statusColor}`}>
+                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                    Farm Status
+                  </p>
+                  <h2
+                    className={`font-display text-4xl md:text-5xl font-bold tracking-tight ${statusColor}`}
+                  >
                     {statusTitle}
                   </h2>
                 </div>
               </div>
-              
+
               <div className="hidden sm:flex items-center gap-3 bg-accent/10 px-4 py-2 rounded-2xl border border-accent/20">
                 <CloudSun className="size-6 text-accent" />
                 <div>
@@ -130,8 +149,12 @@ function Dashboard() {
               <p className="text-muted-foreground text-base md:text-lg max-w-lg font-medium leading-relaxed">
                 {statusDesc}
               </p>
-              
-              <Button asChild size="lg" className="rounded-2xl px-6 font-semibold shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+
+              <Button
+                asChild
+                size="lg"
+                className="rounded-2xl px-6 font-semibold shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all duration-300"
+              >
                 <Link to="/detection">
                   View Live Feed
                   <ArrowRight className="ml-2 size-4" />
@@ -142,59 +165,57 @@ function Dashboard() {
 
           {/* Today's Snapshot (Layer 2) */}
           <div className="flex-1 flex flex-col gap-6">
-             <div className="panel p-6 flex-1 flex flex-col justify-center bg-gradient-to-br from-white to-surface-2 relative overflow-hidden group">
-                <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                   <Activity className="size-32" />
-                </div>
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Today's Activity</p>
-                <div className="flex items-baseline gap-3">
-                  <span className="font-display text-6xl font-bold tracking-tighter text-foreground">{todayTotal}</span>
-                  <span className="text-lg font-medium text-muted-foreground">intrusions</span>
-                </div>
-                <div className="mt-4 flex items-center gap-3">
-                  <RiskPill level="low" />
-                  <span className="text-xs font-semibold text-muted-foreground">Overall Risk Level</span>
-                </div>
-             </div>
+            <div className="panel p-6 flex-1 flex flex-col justify-center bg-gradient-to-br from-white to-surface-2 relative overflow-hidden group">
+              <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                <Activity className="size-32" />
+              </div>
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">
+                Today's Activity
+              </p>
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-6xl font-bold tracking-tighter text-foreground">
+                  {todayTotal}
+                </span>
+                <span className="text-lg font-medium text-muted-foreground">intrusions</span>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <RiskPill level="low" />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Overall Risk Level
+                </span>
+              </div>
+            </div>
           </div>
         </section>
 
-        <div className="grid gap-8 xl:grid-cols-[1.5fr_1fr]">
-          {/* LEFT COLUMN - Primary Monitoring */}
-          <div className="space-y-8">
-            
-            {/* Cinematic Live Camera Preview */}
-            <PanelSection title="Perimeter Vision" right={<Badge variant="outline" className="gap-2 border-primary/20 bg-primary/5 text-primary rounded-full px-3 py-1 font-bold"><span className="size-2 rounded-full bg-primary animate-pulse" /> Live Analysis</Badge>}>
-              <div className="group relative overflow-hidden rounded-[2rem] border border-border shadow-2xl shadow-black/5 bg-black mt-2">
-                <div className="aspect-[21/9] w-full overflow-hidden relative">
-                  <img
-                    src="/agrishield_boar.png"
-                    alt="Farm Feed"
-                    className="w-full h-full object-cover opacity-90 transition-transform duration-[10s] ease-out group-hover:scale-105"
-                  />
-                  
-                  {/* Subtle Gradient Overlay for legibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
-
-                  {/* Premium Glass HUD */}
-                  <div className="absolute top-6 left-6">
-                    <div className="backdrop-blur-xl bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-white shadow-lg">
-                      <p className="text-xs font-bold tracking-wider opacity-80">NORTH BOUNDARY</p>
-                      <p className="font-display text-lg font-bold">CAM-01 Edge</p>
-                    </div>
+        <div className="grid gap-8 xl:grid-cols-[1.5fr_1fr] items-stretch">
+          {/* ROW 1 */}
+          {/* Perimeter Vision */}
+          <PanelSection
+            title="Perimeter Vision"
+            className="h-full flex flex-col"
+            right={
+              <Badge
+                variant="outline"
+                className="gap-2 border-primary/20 bg-primary/5 text-primary rounded-full px-3 py-1 font-bold"
+              >
+                <span className="size-2 rounded-full bg-primary animate-pulse" /> Live Analysis
+              </Badge>
+            }
+          >
+            <div className="group relative overflow-hidden rounded-[2rem] border border-border shadow-2xl shadow-black/5 bg-black mt-2 flex-1 min-h-[240px]">
+              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                <img
+                  src="/agrishield_boar.png"
+                  alt="Farm Feed"
+                  className="w-full h-full object-cover opacity-90 transition-transform duration-[10s] ease-out group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
+                <div className="absolute top-6 left-6">
+                  <div className="backdrop-blur-xl bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-white shadow-lg">
+                    <p className="text-xs font-bold tracking-wider opacity-80">NORTH BOUNDARY</p>
+                    <p className="font-display text-lg font-bold">CAM-01 Edge</p>
                   </div>
-
-                  {systemOn && (
-                    <div className="absolute bottom-6 left-6">
-                       <div className="backdrop-blur-xl bg-primary/20 px-4 py-2 rounded-2xl border border-primary/30 text-white flex items-center gap-3 shadow-lg">
-                         <ShieldCheck className="size-5" />
-                         <div>
-                            <p className="text-xs font-bold tracking-wider opacity-80">AI ENGINE</p>
-                            <p className="font-semibold text-sm">Actively Scanning • 99% Conf</p>
-                         </div>
-                       </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </PanelSection>
@@ -202,22 +223,25 @@ function Dashboard() {
           <PanelSection
             title="Detection overview"
             description="Today and weekly counts per agricultural species"
+            className="h-full flex flex-col"
           >
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {distribution.map((a) => (
                 <div
                   key={a.name}
-                  className="rounded-xl border border-border bg-surface/60 p-3.5 transition-all hover:border-primary/40 hover:bg-surface/80"
+                  className="rounded-xl border border-border bg-surface/60 p-4 transition-all hover:border-primary/40 hover:bg-surface/80 flex flex-col justify-between h-full"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 font-medium text-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <span className="flex items-center gap-2 font-medium text-sm truncate">
                       {a.name}
                     </span>
                     <RiskPill level="medium" />
                   </div>
-                  <div className="mt-3.5 flex items-end gap-5">
+                  <div className="mt-4 flex items-end gap-5">
                     <span>
-                      <span className="block font-display text-xl font-bold">{Math.floor(a.value / 4)}</span>
+                      <span className="block font-display text-xl font-bold">
+                        {Math.floor(a.value / 4)}
+                      </span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         today
                       </span>
@@ -303,4 +327,3 @@ function Dashboard() {
     </AppShell>
   );
 }
-

@@ -1,20 +1,25 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AuthService } from '../services/auth.service';
-import { queryKeys } from '../lib/queryKeys';
-import { AuthStorage } from '../lib/AuthStorage';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AuthService } from "../services/auth.service";
+import { queryKeys } from "../lib/queryKeys";
+import { AuthStorage } from "../lib/AuthStorage";
 
 export function useAuth() {
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({
     queryKey: queryKeys.auth.me,
-    queryFn: () => AuthService.me(),
+    queryFn: async () => {
+      return { id: 1, email: 'ramesh@agrishield.in', name: 'Farmer Demo' };
+    },
     enabled: !!AuthStorage.getToken(),
     retry: false,
   });
 
   const loginMutation = useMutation({
-    mutationFn: AuthService.login,
+    mutationFn: async (data: any) => {
+      // Mock login for hackathon demo
+      return { token: 'mock-jwt-token', user: { id: 1, email: data.email, name: 'Farmer Demo' } };
+    },
     onSuccess: (data) => {
       AuthStorage.setToken(data.token);
       queryClient.setQueryData(queryKeys.auth.me, data.user);
@@ -22,7 +27,10 @@ export function useAuth() {
   });
 
   const signupMutation = useMutation({
-    mutationFn: AuthService.signup,
+    mutationFn: async (data: any) => {
+      // Mock signup for hackathon demo
+      return { token: 'mock-jwt-token', user: { id: 1, email: data.email, name: data.fullName } };
+    },
     onSuccess: (data) => {
       AuthStorage.setToken(data.token);
       queryClient.setQueryData(queryKeys.auth.me, data.user);
