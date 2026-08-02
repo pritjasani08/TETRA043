@@ -26,7 +26,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/detection", label: "Camera Feed", icon: Camera },
   { to: "/history", label: "History & Logs", icon: History },
-  { to: "/heatmap", label: "Zone Heatmap", icon: Map },
+  { to: "/heatmap", label: "Heat Map", icon: Map },
   { to: "/analytics", label: "Data Analytics", icon: BarChart3 },
   { to: "/community", label: "Community", icon: Users },
   { to: "/settings", label: "Settings", icon: SettingsIcon },

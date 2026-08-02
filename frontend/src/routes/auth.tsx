@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAppState } from "@/lib/app-state";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -39,11 +38,11 @@ function AuthPage() {
     remember: true,
   });
 
-  useEffect(() => {
-    if (ready && isAuthed) {
-      navigate({ to: "/dashboard", replace: true });
-    }
-  }, [ready, isAuthed, navigate]);
+  const [formData, setFormData] = useState({
+    mobile: "98250 41122",
+    password: "demo",
+    remember: true,
+  });
 
   const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -84,9 +83,73 @@ function AuthPage() {
     }
   };
 
-  const [email, setEmail] = useState("ramesh@agrishield.in");
-  const [password, setPassword] = useState("demo1234");
-  const [pending, setPending] = useState(false);
+  useEffect(() => {
+    if (ready && isAuthed) {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [ready, isAuthed, navigate]);
+
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    if (/[^\d\s]/.test(val)) {
+      toast.error("Invalid Input", { description: "Only numbers are allowed for mobile number." });
+      return;
+    }
+
+    const rawDigits = val.replace(/\D/g, "");
+    if (rawDigits.length > 10) {
+      toast.error("Limit Exceeded", { description: "Mobile number cannot exceed 10 digits." });
+      return;
+    }
+
+    setFormData({ ...formData, mobile: val });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const rawDigits = formData.mobile.replace(/\D/g, "");
+    if (rawDigits.length !== 10) {
+      toast.error("Invalid Mobile Number", { description: "Please enter exactly 10 digits." });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await login({ email: formData.mobile, password: formData.password });
+      toast.success("Welcome back", { description: "Monitoring console unlocked." });
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error("Login failed", { description: err.message || "Invalid credentials." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const names = signup.fullName.split(" ");
+      const firstName = names[0] || "Farmer";
+      const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+      
+      await signupAuth({
+        email: signup.email,
+        password: signup.password,
+        firstName,
+        lastName,
+      });
+      toast.success("Account created", { description: "Monitoring console unlocked." });
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error("Signup failed", { description: err.message || "Could not create account." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row bg-[#07111F] text-white overflow-hidden relative selection:bg-[#A3E635]/30">

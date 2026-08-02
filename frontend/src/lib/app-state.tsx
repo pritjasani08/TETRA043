@@ -60,6 +60,8 @@ type AppState = {
   updateProfile: (p: Partial<Profile>) => void;
   updateSettings: (s: Partial<Settings>) => void;
   setSystemOn: (on: boolean) => void;
+  farmBoundary: { lat: number; lng: number }[] | null;
+  setFarmBoundary: (points: { lat: number; lng: number }[] | null) => void;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -71,6 +73,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [systemOn, setSystem] = useState(true);
   const [offSince, setOffSince] = useState<number | null>(null);
+  const [farmBoundary, setFarmBoundaryState] = useState<{ lat: number; lng: number }[] | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -83,6 +86,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       if (parsed.settings) setSettings({ ...DEFAULT_SETTINGS, ...parsed.settings });
       if (typeof parsed.systemOn === "boolean") setSystem(parsed.systemOn);
       if (parsed.offSince) setOffSince(parsed.offSince);
+      if (parsed.farmBoundary !== undefined) setFarmBoundaryState(parsed.farmBoundary);
     } catch {
       /* ignore */
     } finally {
@@ -95,12 +99,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(
         KEY,
-        JSON.stringify({ authed, profile, settings, systemOn, offSince }),
+        JSON.stringify({ authed, profile, settings, systemOn, offSince, farmBoundary }),
       );
     } catch {
       /* ignore */
     }
-  }, [ready, authed, profile, settings, systemOn, offSince]);
+  }, [ready, authed, profile, settings, systemOn, offSince, farmBoundary]);
 
   const setSystemOn = useCallback((on: boolean) => {
     setSystem(on);
@@ -123,8 +127,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       updateProfile: (p) => setProfile((prev) => ({ ...prev, ...p })),
       updateSettings: (s) => setSettings((prev) => ({ ...prev, ...s })),
       setSystemOn,
+      farmBoundary,
+      setFarmBoundary: setFarmBoundaryState,
     }),
-    [ready, authed, profile, settings, systemOn, offSince, setSystemOn],
+    [ready, authed, profile, settings, systemOn, offSince, farmBoundary, setSystemOn],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
