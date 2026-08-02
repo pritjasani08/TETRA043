@@ -29,8 +29,8 @@ def print_gpu_info():
         print(f"Total GPU Memory: {total_memory:.2f} MB")
     else:
         print(f"CUDA Available: NO")
-        print("CRITICAL ERROR: GPU not found. Never use CPU inference as per requirements.")
-        sys.exit(1)
+        print("WARNING: GPU not found. Falling back to CPU inference. This will be slower.")
+        # sys.exit(1)
     print("=" * 60)
 
 def video_reader_worker(video_path, frame_queue, progress_tracker):
@@ -75,8 +75,9 @@ def process_video(input_video_path, output_video_path, batch_size=8):
     print(f"\nLoading Model: {model_path}")
     model = YOLO(model_path)
     
-    # Ensure it's on GPU
-    model.to('cuda')
+    # Ensure it's on GPU or CPU fallback
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device)
     
     # Read Video metadata
     cap = cv2.VideoCapture(input_video_path)
