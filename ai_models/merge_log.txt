@@ -1,0 +1,18 @@
+Number of images copied: 10433
+Number of labels copied: 10433
+Missing labels: 36
+Missing images: 0
+Skipped files: 36
+Train count: 7952
+Validation count: 1646
+Test count: 835
+Per-class statistics:
+- wild_boar: 1897
+- nilgai: 676
+- cow: 981
+- buffalo: 1168
+- goat: 1018
+- monkey: 1277
+- dog: 1006
+- peacock: 1277
+- deer: 1133

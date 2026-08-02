@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Datasets (Keep directories, ignore contents)
+dataset/*
+!dataset/.gitkeep
+animal_detection_dataset/*
+!animal_detection_dataset/.gitkeep
+
+# Models (Keep directory, ignore trained models)
+models/*
+!models/.gitkeep
+*.pt
+
+# Virtual Environments
+.venv/
+env/
+venv/
+
+# Outputs and Temporary files
+runs/
+logs/
+predictions/
+temp/
+pip_cache/  
+ 
