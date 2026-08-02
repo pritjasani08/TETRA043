@@ -305,8 +305,12 @@ function AnalyticsPage() {
                     cursor={{ fill: "var(--muted)", opacity: 0.1 }}
                   />
                   <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                    {PEAK_HOURS.map((h: any, i: number) => (
-                      <Cell key={i} fill={h.count > 18 ? "var(--warning)" : "var(--primary)"} opacity={h.count > 18 ? 1 : 0.6} />
+                    {PEAK_HOURS.map((h, i) => (
+                      <Cell
+                        key={i}
+                        fill={h.count > 18 ? "var(--warning)" : "var(--primary)"}
+                        opacity={h.count > 18 ? 1 : 0.6}
+                      />
                     ))}
                   </Bar>
                 </BarChart>

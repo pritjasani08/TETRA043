@@ -274,7 +274,13 @@ function Dashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                        A <strong className="text-foreground font-bold">{(latestAlert as any).animal || 'Animal'}</strong> was safely deterred near the <strong className="text-foreground font-bold">{(latestAlert as any).side || 'fence'}</strong> at {(latestAlert as any).time || 'recently'}.
+                        A{" "}
+                        <strong className="text-foreground font-bold">{latestAlert.animal}</strong>{" "}
+                        was safely deterred near the{" "}
+                        <strong className="text-foreground font-bold">
+                          {latestAlert.side}
+                        </strong>{" "}
+                        at {latestAlert.time}.
                       </p>
                       <Button
                         variant="outline"
@@ -336,7 +342,7 @@ function Dashboard() {
 
             {/* Elegant Distribution Donut */}
             <PanelSection title="Animal Distribution">
-               <div className="flex items-center gap-6 mt-2">
+<div className="flex items-center gap-6 mt-2">
                   <div className="h-32 w-32 shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -427,10 +433,17 @@ function Dashboard() {
                       </span>
                     </div>
                   </div>
+<<<<<<< HEAD
 
               ))}
             </div>
           </PanelSection>
+=======
+                ))}
+              </div>
+            </PanelSection>
+          </div>
+>>>>>>> origin/main
         </div>
 
         {/* Right Side: System Logs & Recent Alerts */}
